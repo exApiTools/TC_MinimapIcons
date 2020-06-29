@@ -23,14 +23,15 @@ namespace MinimapIcons
         private CachedValue<float> _diag;
         private CachedValue<RectangleF> _mapRect;
 
-        private List<string> ignoreEntites = new List<string>
+        private List<string> Ignored = new List<string>
         {
-            "Metadata/Monsters/Frog/FrogGod/SilverPool",
-            "Metadata/MiscellaneousObjects/WorldItem",
-            "Metadata/Pet/Weta/Basic",
-            "Metadata/Monsters/Daemon/SilverPoolChillDaemon",
-            "Metadata/Monsters/Daemon",
-            "Metadata/Monsters/Frog/FrogGod/SilverOrbFromMonsters"
+            // "Metadata/Monsters/Frog/FrogGod/SilverPool",
+            // "Metadata/MiscellaneousObjects/WorldItem",
+            // "Metadata/Pet/Weta/Basic",
+            // "Metadata/Monsters/Daemon/SilverPoolChillDaemon",
+            // "Metadata/Monsters/Daemon",
+            // "Metadata/Monsters/Frog/FrogGod/SilverOrbFromMonsters",
+            "Metadata/Monsters/AtlasExiles/CrusaderInfluenceMonsters/CrusaderArcaneRune"
         };
 
         private IngameUIElements ingameStateIngameUi;
@@ -133,6 +134,14 @@ namespace MinimapIcons
                     continue;
 
                 if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
+                    continue;
+
+                if (Ignored.Any(x => icon.Entity.Path.StartsWith(x)))
+                    continue;
+
+                if (icon.Entity.Path.StartsWith(
+                    "Metadata/Monsters/AtlasExiles/BasiliskInfluenceMonsters/BasiliskBurrowingViper")
+                    && (icon.Entity.Rarity != MonsterRarity.Unique))
                     continue;
 
                 if (icon.HasIngameIcon)

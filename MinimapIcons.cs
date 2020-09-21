@@ -276,7 +276,10 @@ namespace MinimapIcons
                         if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
                             continue;
 
-                        if (icon.HasIngameIcon  && !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
+                        if (icon.HasIngameIcon && icon.Entity.Type != EntityType.Monster && icon.Entity.League != LeagueType.Heist)
+                            continue;
+                        
+                        if (icon.HasIngameIcon && !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
                             continue;
 
                         if (!icon.Show())

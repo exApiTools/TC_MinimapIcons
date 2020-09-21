@@ -289,3 +289,6 @@ SharpDX.Desktop.dll
 PoeHUD.exe.config
 Newtonsoft.Json.xml
 /MinimapIcons.dll.config
+
+# KDiff 3
+*.orig

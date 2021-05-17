@@ -242,16 +242,20 @@ namespace MinimapIcons
             if (ingameStateIngameUi.Atlas.IsVisibleLocal || ingameStateIngameUi.DelveWindow.IsVisibleLocal || ingameStateIngameUi.TreePanel.IsVisibleLocal)
                 return;
 
-            if (!GameController.Player.HasComponent<Positioned>() || !GameController.Player.HasComponent<Render>())
-                return;
+            var playerPositioned = GameController?.Player?.GetComponent<Positioned>();
+            if (playerPositioned == null) return;
+            Vector2 playerPos = playerPositioned.GridPos;
+            var playerRender = GameController?.Player?.GetComponent<Render>();
+            if (playerRender == null) return;
+            float posZ = playerRender.Pos.Z;
 
-            var playerPos = GameController.Player?.GetComponent<Positioned>()?.GridPos ?? new Vector2();
-            var posZ = GameController.Player.GetComponent<Render>()?.Pos.Z ?? 0;
+            if (MapWindow == null) return;
             var mapWindowLargeMapZoom = MapWindow.LargeMapZoom;
 
-            var baseIcons = GameController.EntityListWrapper.OnlyValidEntities
+            var baseIcons = GameController?.EntityListWrapper?.OnlyValidEntities
                 .SelectWhereF(x => x.GetHudComponent<BaseIcon>(), icon => icon != null).OrderByF(x => x.Priority)
                 .ToList();
+            if (baseIcons == null) return;
 
             foreach (var icon in baseIcons)
             {
@@ -281,6 +285,7 @@ namespace MinimapIcons
                 var component = icon?.Entity?.GetComponent<Render>();
                 if (component == null) continue;
                 var iconZ = component.Pos.Z;
+
                 Vector2 position;
 
                 if (largeMap)
@@ -355,8 +360,7 @@ namespace MinimapIcons
                                        MapIcon.DeltaInWorldToMinimapDelta(icon.GridPosition() - playerPos, Diag, 240f, (iconZ - posZ) / 20);
                         }
 
-                        HudTexture iconValueMainTexture;
-                        iconValueMainTexture = icon.MainTexture;
+                        var iconValueMainTexture = icon.MainTexture;
                         var size = iconValueMainTexture.Size;
                         var halfSize = size / 2f;
                         icon.DrawRect = new RectangleF(position.X - halfSize, position.Y - halfSize, size, size);

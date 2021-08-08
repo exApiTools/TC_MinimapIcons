@@ -73,6 +73,7 @@ namespace MinimapIcons
             "Metadata/Monsters/LegionLeague/LegionVaalGeneralProjectileDaemon",
             "Metadata/Monsters/LegionLeague/LegionSergeantStampedeDaemon",
             "Metadata/Monsters/LegionLeague/LegionSandTornadoDaemon",
+            "Metadata/Monsters/LegionLeague/LegionVaalGeneralMoveDaemonQuad", // Viper Napuatzi, Legion Boss
 
             // Random Ignores
             "Metadata/Monsters/InvisibleFire/InvisibleSandstorm_",
@@ -87,6 +88,8 @@ namespace MinimapIcons
             "Metadata/Monsters/InvisibleFire/InvisibleFireDelveFlameTornadoSpiked",
             "Metadata/Monsters/InvisibleFire/InvisibleHolyCannon",
             "Metadata/Monsters/InvisibleFire/DelveVaalBossInvisibleLight",
+            "Metadata/Monsters/InvisibleFire/InvisibleChaosstorm", // Avatar of Undoing, Geode Boss
+            "Metadata/Monsters/InvisibleFire/InvisibleKitavaCannon",
 
             "Metadata/Monsters/InvisibleCurse/InvisibleFrostbiteStationary",
             "Metadata/Monsters/InvisibleCurse/InvisibleConductivityStationary",
@@ -150,6 +153,7 @@ namespace MinimapIcons
             "Metadata/Monsters/LeagueBestiary/ParasiticSquidBestiaryClone",
             "Metadata/Monsters/LeagueBestiary/HellionBestiaryClone",
             "Metadata/Monsters/LeagueBestiary/BestiarySpiderCocoon",
+            "Metadata/Monsters/LeagueBestiary/GemFrogBestiaryClone",
 
             // Ritual
             "Metadata/Monsters/LeagueRitual/GoldenCoinDaemon",

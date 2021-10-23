@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using ExileCore;
 using ExileCore.PoEMemory.Components;
+using ExileCore.PoEMemory.Elements;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
 using ExileCore.Shared.Abstract;
@@ -166,8 +167,8 @@ namespace MinimapIcons
         private bool largeMap;
         private float scale;
         private Vector2 screentCenterCache;
-        private Map MapWindow => GameController.Game.IngameState.IngameUi.Map;
-        private RectangleF MapRect => _mapRect?.Value ?? (_mapRect = new TimeCache<RectangleF>(() => MapWindow.GetClientRect(), 100)).Value;
+        private SubMap LargeMapWindow => GameController.Game.IngameState.IngameUi.Map.LargeMap;
+        private RectangleF LargeMapRect => _mapRect?.Value ?? (_mapRect = new TimeCache<RectangleF>(() => LargeMapWindow.GetClientRect(), 100)).Value;
         private Camera Camera => GameController.Game.IngameState.Camera;
         private float Diag =>
             _diag?.Value ?? (_diag = new TimeCache<float>(() =>
@@ -180,9 +181,6 @@ namespace MinimapIcons
 
                 return (float) Math.Sqrt(Camera.Width * Camera.Width + Camera.Height * Camera.Height);
             }, 100)).Value;
-        private Vector2 ScreenCenter =>
-            new Vector2(MapRect.Width / 2, MapRect.Height / 2 - 20) + new Vector2(MapRect.X, MapRect.Y) +
-            new Vector2(MapWindow.LargeMapShiftX, MapWindow.LargeMapShiftY);
 
         public override void OnLoad()
         {
@@ -226,17 +224,17 @@ namespace MinimapIcons
             if (ingameStateIngameUi.Map.SmallMiniMap.IsVisibleLocal)
             {
                 var mapRect = ingameStateIngameUi.Map.SmallMiniMap.GetClientRectCache;
-                screentCenterCache = new Vector2(mapRect.X + mapRect.Width / 2, mapRect.Y + mapRect.Height / 2);
+                screentCenterCache = mapRect.Center;
                 largeMap = false;
             }
             else if (ingameStateIngameUi.Map.LargeMap.IsVisibleLocal)
             {
-                screentCenterCache = ScreenCenter;
+                screentCenterCache = LargeMapRect.TopLeft + LargeMapWindow.DefaultShift + LargeMapWindow.Shift;
                 largeMap = true;
             }
 
             k = Camera.Width < 1024f ? 1120f : 1024f;
-            scale = k / Camera.Height * Camera.Width * 3f / 4f / MapWindow.LargeMapZoom;
+            scale = k / Camera.Height * Camera.Width * 3f / 4f / LargeMapWindow.Zoom;
         }
 
         public override void Render()
@@ -253,8 +251,8 @@ namespace MinimapIcons
             if (playerRender == null) return;
             float posZ = playerRender.Pos.Z;
 
-            if (MapWindow == null) return;
-            var mapWindowLargeMapZoom = MapWindow.LargeMapZoom;
+            if (LargeMapWindow == null) return;
+            var mapWindowLargeMapZoom = LargeMapWindow.Zoom;
 
             var baseIcons = GameController?.EntityListWrapper?.OnlyValidEntities
                 .SelectWhereF(x => x.GetHudComponent<BaseIcon>(), icon => icon != null).OrderByF(x => x.Priority)

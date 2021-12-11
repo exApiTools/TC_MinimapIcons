@@ -338,7 +338,8 @@ namespace IconsBuilder.Icons
                     MainTexture.Size = settings.SizeChestIcon;
                     MainTexture.UV = SpriteHelper.GetUV(MyMapIconsIndex.Divination);
                     var name = Entity.GetComponent<Render>().Name;
-                    Text = name.Substring(0, name.IndexOf(" ", StringComparison.Ordinal));
+                    var spaceIndex = name.IndexOf(" ", StringComparison.Ordinal);
+                    Text = spaceIndex != -1 ? name.Substring(0, spaceIndex) : name;
                     MainTexture.Color = Color.Pink;
                     if (FossilRarity.TryGetValue(Text, out var clr)) MainTexture.Color = clr;
 

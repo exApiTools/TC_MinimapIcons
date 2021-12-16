@@ -1,30 +1,26 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements;
 using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared;
 using ExileCore.Shared.Abstract;
 using ExileCore.Shared.Cache;
 using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
 using JM.LinqFaster;
 using SharpDX;
-using Map = ExileCore.PoEMemory.Elements.Map;
 
 namespace MinimapIcons
 {
     public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
     {
-        private const string ALERT_CONFIG = "config\\new_mod_alerts.txt";
-        private readonly Dictionary<string, Size2> modIcons = new Dictionary<string, Size2>();
         private CachedValue<float> _diag;
         private CachedValue<RectangleF> _mapRect;
 
-        private readonly List<string> Ignored = new List<string>
+        private static readonly List<string> Ignored = new List<string>
         {
             // Delirium Ignores
             "Metadata/Monsters/LeagueAffliction/DoodadDaemons/DoodadDaemonEyes1",
@@ -162,25 +158,27 @@ namespace MinimapIcons
             "Metadata/Monsters/LeagueRitual/GenericChargesDaemon",
         };
 
+        private readonly Dictionary<string, bool> IgnoreCache = new Dictionary<string, bool>();
+
         private IngameUIElements ingameStateIngameUi;
         private float k;
         private bool largeMap;
         private float scale;
-        private Vector2 screentCenterCache;
+        private Vector2 mapCenterCache;
         private SubMap LargeMapWindow => GameController.Game.IngameState.IngameUi.Map.LargeMap;
-        private RectangleF LargeMapRect => _mapRect?.Value ?? (_mapRect = new TimeCache<RectangleF>(() => LargeMapWindow.GetClientRect(), 100)).Value;
+        private RectangleF LargeMapRect => (_mapRect ??= new TimeCache<RectangleF>(() => LargeMapWindow.GetClientRect(), 100)).Value;
         private Camera Camera => GameController.Game.IngameState.Camera;
         private float Diag =>
-            _diag?.Value ?? (_diag = new TimeCache<float>(() =>
-            {
-                if (ingameStateIngameUi.Map.SmallMiniMap.IsVisibleLocal)
+            (_diag ??= new TimeCache<float>(() =>
                 {
-                    var mapRect = ingameStateIngameUi.Map.SmallMiniMap.GetClientRect();
-                    return (float) (Math.Sqrt(mapRect.Width * mapRect.Width + mapRect.Height * mapRect.Height) / 2f);
-                }
+                    if (ingameStateIngameUi.Map.SmallMiniMap.IsVisibleLocal)
+                    {
+                        var mapRect = ingameStateIngameUi.Map.SmallMiniMap.GetClientRect();
+                        return (float)(Math.Sqrt(mapRect.Width * mapRect.Width + mapRect.Height * mapRect.Height) / 2f);
+                    }
 
-                return (float) Math.Sqrt(Camera.Width * Camera.Width + Camera.Height * Camera.Height);
-            }, 100)).Value;
+                    return (float)Math.Sqrt(Camera.Width * Camera.Width + Camera.Height * Camera.Height);
+                }, 100)).Value;
 
         public override void OnLoad()
         {
@@ -210,12 +208,12 @@ namespace MinimapIcons
             if (ingameStateIngameUi.Map.SmallMiniMap.IsVisibleLocal)
             {
                 var mapRect = ingameStateIngameUi.Map.SmallMiniMap.GetClientRectCache;
-                screentCenterCache = mapRect.Center;
+                mapCenterCache = mapRect.Center;
                 largeMap = false;
             }
             else if (ingameStateIngameUi.Map.LargeMap.IsVisibleLocal)
             {
-                screentCenterCache = LargeMapRect.TopLeft + LargeMapWindow.DefaultShift + LargeMapWindow.Shift;
+                mapCenterCache = LargeMapRect.TopLeft + LargeMapWindow.DefaultShift + LargeMapWindow.Shift;
                 largeMap = true;
             }
 
@@ -227,12 +225,12 @@ namespace MinimapIcons
         {
             if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && !largeMap) return;
 
-            if (ingameStateIngameUi.Atlas.IsVisibleLocal || ingameStateIngameUi.DelveWindow.IsVisibleLocal || ingameStateIngameUi.TreePanel.IsVisibleLocal)
+            if (/*ingameStateIngameUi.Atlas.IsVisibleLocal ||*/ ingameStateIngameUi.DelveWindow.IsVisibleLocal || ingameStateIngameUi.TreePanel.IsVisibleLocal)
                 return;
 
             var playerPositioned = GameController?.Player?.GetComponent<Positioned>();
             if (playerPositioned == null) return;
-            Vector2 playerPos = playerPositioned.GridPos;
+            var playerPos = playerPositioned.GridPos;
             var playerRender = GameController?.Player?.GetComponent<Render>();
             if (playerRender == null) return;
             float posZ = playerRender.Pos.Z;
@@ -240,15 +238,17 @@ namespace MinimapIcons
             if (LargeMapWindow == null) return;
             var mapWindowLargeMapZoom = LargeMapWindow.Zoom;
 
-            var baseIcons = GameController?.EntityListWrapper?.OnlyValidEntities
-                .SelectWhereF(x => x.GetHudComponent<BaseIcon>(), icon => icon != null).OrderByF(x => x.Priority)
-                .ToList();
+            var entitySource = Settings.DrawNotValid
+                                   ? GameController?.EntityListWrapper.Entities
+                                   : GameController?.EntityListWrapper?.OnlyValidEntities;
+            var baseIcons = entitySource?.SelectWhereF(x => x.GetHudComponent<BaseIcon>(), icon => icon != null)
+                                         .OrderByF(x => x.Priority)
+                                         .ToList();
             if (baseIcons == null) return;
 
             foreach (var icon in baseIcons)
             {
-                if (icon == null) continue;
-                if (icon.Entity == null) continue;
+                if (icon?.Entity == null) continue;
 
                 if (icon.Entity.Type == EntityType.WorldItem)
                     continue;
@@ -256,12 +256,13 @@ namespace MinimapIcons
                 if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
                     continue;
 
-                if (Ignored.Any(x => icon.Entity.Path.StartsWith(x)))
+
+                if (IgnoreCache.GetOrAdd(icon.Entity.Path, () => Ignored.Any(x => icon.Entity.Path.StartsWith(x))))
                     continue;
 
                 if (icon.Entity.Path.StartsWith(
                     "Metadata/Monsters/AtlasExiles/BasiliskInfluenceMonsters/BasiliskBurrowingViper")
-                    && (icon.Entity.Rarity != MonsterRarity.Unique))
+                    && icon.Entity.Rarity != MonsterRarity.Unique)
                     continue;
 
                 if (icon.HasIngameIcon && !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
@@ -274,21 +275,12 @@ namespace MinimapIcons
                 if (component == null) continue;
                 var iconZ = component.Pos.Z;
 
-                Vector2 position;
+                //TODO: 240f is probably wrong for minimap, but who plays without the large one?
+                var xyScale = largeMap ? scale : 240f;
+                var zScale = largeMap ? 9f / mapWindowLargeMapZoom : 20;
+                var position = mapCenterCache + MapIcon.DeltaInWorldToMinimapDelta(icon.GridPosition() - playerPos, Diag, xyScale, (iconZ - posZ) / zScale);
 
-                if (largeMap)
-                {
-                    position = screentCenterCache + MapIcon.DeltaInWorldToMinimapDelta(
-                                   icon.GridPosition() - playerPos, Diag, scale, (iconZ - posZ) / (9f / mapWindowLargeMapZoom));
-                }
-                else
-                {
-                    position = screentCenterCache +
-                               MapIcon.DeltaInWorldToMinimapDelta(icon.GridPosition() - playerPos, Diag, 240f, (iconZ - posZ) / 20);
-                }
-
-                HudTexture iconValueMainTexture;
-                iconValueMainTexture = icon.MainTexture;
+                var iconValueMainTexture = icon.MainTexture;
                 var size = iconValueMainTexture.Size;
                 var halfSize = size / 2f;
                 icon.DrawRect = new RectangleF(position.X - halfSize, position.Y - halfSize, size, size);
@@ -308,68 +300,21 @@ namespace MinimapIcons
                 if (!string.IsNullOrEmpty(icon.Text))
                     Graphics.DrawText(icon.Text, position.Translate(0, Settings.ZForText), FontAlign.Center);
             }
+        }
+    }
 
-            if (Settings.DrawNotValid)
+    public static class Extensions
+    {
+        public static T GetOrAdd<TKey, T>(this Dictionary<TKey, T> dictionary, TKey key, Func<T> valueFunc)
+        {
+            if (dictionary.TryGetValue(key, out var result))
             {
-                for (var index = 0; index < GameController.EntityListWrapper.NotOnlyValidEntities.Count; index++)
-                {
-                    var entity = GameController.EntityListWrapper.NotOnlyValidEntities[index];
-                    if (entity.Type == EntityType.WorldItem) continue;
-                    var icon = entity.GetHudComponent<BaseIcon>();
-
-                    if (icon != null && !entity.IsValid && icon.Show())
-                    {
-                        if (icon.Entity.Type == EntityType.WorldItem)
-                            continue;
-
-                        if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
-                            continue;
-
-                        if (icon.HasIngameIcon && icon.Entity.Type != EntityType.Monster && icon.Entity.League != LeagueType.Heist)
-                            continue;
-                        
-                        if (icon.HasIngameIcon && !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
-                            continue;
-
-                        if (!icon.Show())
-                            continue;
-
-                        var iconZ = icon.Entity.Pos.Z;
-                        Vector2 position;
-
-                        if (largeMap)
-                        {
-                            position = screentCenterCache + MapIcon.DeltaInWorldToMinimapDelta(
-                                           icon.GridPosition() - playerPos, Diag, scale, (iconZ - posZ) / (9f / mapWindowLargeMapZoom));
-                        }
-                        else
-                        {
-                            position = screentCenterCache +
-                                       MapIcon.DeltaInWorldToMinimapDelta(icon.GridPosition() - playerPos, Diag, 240f, (iconZ - posZ) / 20);
-                        }
-
-                        var iconValueMainTexture = icon.MainTexture;
-                        var size = iconValueMainTexture.Size;
-                        var halfSize = size / 2f;
-                        icon.DrawRect = new RectangleF(position.X - halfSize, position.Y - halfSize, size, size);
-                        Graphics.DrawImage(iconValueMainTexture.FileName, icon.DrawRect, iconValueMainTexture.UV, iconValueMainTexture.Color);
-
-                        if (icon.Hidden())
-                        {
-                            var s = icon.DrawRect.Width * 0.5f;
-                            icon.DrawRect.Inflate(-s, -s);
-
-                            Graphics.DrawImage(icon.MainTexture.FileName, icon.DrawRect,
-                                SpriteHelper.GetUV(MapIconsIndex.LootFilterSmallCyanCircle), Color.White);
-
-                            icon.DrawRect.Inflate(s, s);
-                        }
-
-                        if (!string.IsNullOrEmpty(icon.Text))
-                            Graphics.DrawText(icon.Text, position.Translate(0, Settings.ZForText), FontAlign.Center);
-                    }
-                }
+                return result;
             }
+
+            result = valueFunc();
+            dictionary[key] = result;
+            return result;
         }
     }
 }

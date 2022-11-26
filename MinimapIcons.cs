@@ -122,7 +122,7 @@ namespace MinimapIcons
 
             Positioned playerPositioned = GameController?.Player?.GetComponent<Positioned>();
             if (playerPositioned == null) return;
-            Vector2 playerPos = playerPositioned.GridPosNum;
+            Vector2 playerPos = playerPositioned.WorldPosNum.WorldToGrid();
             Render playerRender = GameController?.Player?.GetComponent<Render>();
             if (playerRender == null) return;
             float posZ = playerRender.PosNum.Z;

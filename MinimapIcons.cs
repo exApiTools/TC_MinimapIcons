@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements;
@@ -10,7 +9,6 @@ using ExileCore.Shared.Abstract;
 using ExileCore.Shared.Cache;
 using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
-using JM.LinqFaster;
 using SharpDX;
 
 namespace MinimapIcons
@@ -165,7 +163,7 @@ namespace MinimapIcons
         private bool largeMap;
         private float scale;
         private Vector2 mapCenterCache;
-        private SubMap LargeMapWindow => GameController.Game.IngameState.IngameUi.Map.LargeMap;
+        private SubMap LargeMapWindow => GameController.Game.IngameState.IngameUi.Map.LargeMap.AsObject<SubMap>();
         private RectangleF LargeMapRect => (_mapRect ??= new TimeCache<RectangleF>(() => LargeMapWindow.GetClientRect(), 100)).Value;
         private Camera Camera => GameController.Game.IngameState.Camera;
         private float Diag =>
@@ -230,9 +228,9 @@ namespace MinimapIcons
 
             var playerPositioned = GameController?.Player?.GetComponent<Positioned>();
             if (playerPositioned == null) return;
-            var playerPos = playerPositioned.GridPos;
             var playerRender = GameController?.Player?.GetComponent<Render>();
             if (playerRender == null) return;
+            var playerPos = WorldPositionExtensions.WorldToGrid(playerRender.Pos);
             float posZ = playerRender.Pos.Z;
 
             if (LargeMapWindow == null) return;
@@ -241,9 +239,10 @@ namespace MinimapIcons
             var entitySource = Settings.DrawNotValid
                                    ? GameController?.EntityListWrapper.Entities
                                    : GameController?.EntityListWrapper?.OnlyValidEntities;
-            var baseIcons = entitySource?.SelectWhereF(x => x.GetHudComponent<BaseIcon>(), icon => icon != null)
-                                         .OrderByF(x => x.Priority)
-                                         .ToList();
+            var baseIcons = entitySource?.Select(x => x.GetHudComponent<BaseIcon>())
+               .Where(icon => icon != null)
+               .OrderBy(x => x.Priority)
+               .ToList();
             if (baseIcons == null) return;
 
             foreach (var icon in baseIcons)

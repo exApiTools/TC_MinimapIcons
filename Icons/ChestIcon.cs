@@ -14,7 +14,7 @@ namespace IconsBuilder.Icons
 {
     public class ChestIcon : BaseIcon
     {
-        public ChestIcon(Entity entity, GameController gameController, IconsBuilderSettings settings) : base(entity, settings)
+        public ChestIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
         {
             Update(entity, settings);
         }

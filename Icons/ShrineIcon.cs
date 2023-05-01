@@ -1,4 +1,3 @@
-using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
@@ -10,7 +9,7 @@ namespace IconsBuilder.Icons
 {
     public class ShrineIcon : BaseIcon
     {
-        public ShrineIcon(Entity entity, GameController gameController, IconsBuilderSettings settings) : base(entity, settings)
+        public ShrineIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
         {
             MainTexture = new HudTexture("Icons.png");
             MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.Shrine);

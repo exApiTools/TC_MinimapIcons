@@ -1,5 +1,4 @@
 using System;
-using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
@@ -11,7 +10,7 @@ namespace IconsBuilder.Icons
 {
     public class MiscIcon : BaseIcon
     {
-        public MiscIcon(Entity entity, GameController gameController, IconsBuilderSettings settings) : base(entity, settings)
+        public MiscIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
         {
             Update(entity, settings);
         }
@@ -47,14 +46,8 @@ namespace IconsBuilder.Icons
                 {
                     Show = () =>
                     {
-                        var isVisible = false;
-
-                        if (entity.HasComponent<MinimapIcon>())
-                        {
-                            var minimapIcon = entity.GetComponent<MinimapIcon>();
-                            isVisible = minimapIcon.IsVisible && !minimapIcon.IsHide;
-                        }
-
+                        if (!entity.TryGetComponent<MinimapIcon>(out var minimapIcon)) return false;
+                        var isVisible = minimapIcon.IsVisible && !minimapIcon.IsHide;
                         return entity.IsValid && isVisible && entity.IsTargetable;
                     };
                 }

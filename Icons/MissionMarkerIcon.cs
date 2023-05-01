@@ -1,4 +1,3 @@
-using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
@@ -10,7 +9,7 @@ namespace IconsBuilder.Icons
 {
     public class MissionMarkerIcon : BaseIcon
     {
-        public MissionMarkerIcon(Entity entity, GameController gameController, IconsBuilderSettings settings) : base(entity, settings)
+        public MissionMarkerIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
         {
             MainTexture = new HudTexture();
             MainTexture.FileName = "Icons.png";

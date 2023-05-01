@@ -1,4 +1,3 @@
-using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
@@ -10,7 +9,7 @@ namespace IconsBuilder.Icons
 {
     public class NpcIcon : BaseIcon
     {
-        public NpcIcon(Entity entity, GameController gameController, IconsBuilderSettings settings) : base(entity, settings)
+        public NpcIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
         {
             if (!_HasIngameIcon) MainTexture = new HudTexture("Icons.png");
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
@@ -14,7 +13,7 @@ namespace IconsBuilder.Icons
 {
     internal class DeliriumIcon : BaseIcon
     {
-        public DeliriumIcon(Entity entity, GameController gameController, IconsBuilderSettings settings, Dictionary<string, Size2> modIcons): base(entity, settings)
+        public DeliriumIcon(Entity entity, IconsBuilderSettings settings, Dictionary<string, Size2> modIcons): base(entity, settings)
         {
             Update(entity, settings, modIcons);
         }
@@ -132,7 +131,7 @@ namespace IconsBuilder.Icons
                             MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeYellowCircle);
                             break;
                         case MonsterRarity.Unique:
-                            MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeCyanHexagon);
+                            MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeWhiteHexagon);
                             MainTexture.Color = Color.DarkOrange;
                             break;
                         default:

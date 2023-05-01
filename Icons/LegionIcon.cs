@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
@@ -15,7 +14,7 @@ namespace IconsBuilder.Icons
 {
     public class LegionIcon : BaseIcon
     {
-        public LegionIcon(Entity entity, GameController gameController, IconsBuilderSettings settings, Dictionary<string, Size2> modIcons) :
+        public LegionIcon(Entity entity, IconsBuilderSettings settings, Dictionary<string, Size2> modIcons) :
             base(entity, settings)
         {
             Update(entity, settings, modIcons);
@@ -99,7 +98,7 @@ namespace IconsBuilder.Icons
                                 MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeYellowCircle);
                                 break;
                             case MonsterRarity.Unique:
-                                MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeCyanHexagon);
+                                MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeWhiteHexagon);
                                 MainTexture.Color = Color.DarkOrange;
                                 break;
                             default:
@@ -142,7 +141,7 @@ namespace IconsBuilder.Icons
                     Show = () => Entity.IsAlive && frozenCheck.Value;
                 }
                 else
-                    Show = () => !Hidden() && Entity.GetComponent<Life>().HPPercentage > 0.02;
+                    Show = () => !Hidden() && Entity.GetComponent<Life>()?.HPPercentage > 0.02;
             }
         }
     }

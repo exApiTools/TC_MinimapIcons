@@ -66,8 +66,6 @@ namespace IconsBuilder.Icons
             }
             else
             {
-                string modName = null;
-
                 if (entity.HasComponent<ObjectMagicProperties>())
                 {
                     var objectMagicProperties = entity.GetComponent<ObjectMagicProperties>();
@@ -75,7 +73,7 @@ namespace IconsBuilder.Icons
                     var mods = objectMagicProperties.Mods;
                     if (mods.Contains("MonsterConvertsOnDeath_")) Show = () => entity.IsValid && entity.IsAlive && entity.IsHostile;
 
-                    modName = mods.FirstOrDefaultF(modIcons.ContainsKey);
+                    var modName = mods.FirstOrDefaultF(modIcons.ContainsKey);
 
                     if (modName != null)
                     {
@@ -133,9 +131,9 @@ namespace IconsBuilder.Icons
                     {
                         var stats = Entity.Stats;
                         if (stats.Count == 0) return false;
-                        stats.TryGetValue(GameStat.FrozenInTime, out var FrozenInTime);
-                        stats.TryGetValue(GameStat.MonsterHideMinimapIcon, out var MonsterHideMinimapIcon);
-                        return FrozenInTime == 1 && MonsterHideMinimapIcon == 1 || FrozenInTime == 0 && MonsterHideMinimapIcon == 0;
+                        stats.TryGetValue(GameStat.FrozenInTime, out var frozenInTime);
+                        stats.TryGetValue(GameStat.MonsterHideMinimapIcon, out var monsterHideMinimapIcon);
+                        return frozenInTime == 1 && monsterHideMinimapIcon == 1 || frozenInTime == 0 && monsterHideMinimapIcon == 0;
                     }, 75);
 
                     Show = () => Entity.IsAlive && frozenCheck.Value;

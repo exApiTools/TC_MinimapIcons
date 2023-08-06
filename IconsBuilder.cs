@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared;
 using ExileCore.Shared.Abstract;
 using ExileCore.Shared.Enums;
 using IconsBuilder.Icons;
@@ -111,10 +109,9 @@ namespace IconsBuilder
 
         private bool SkipIcon(Entity entity)
         {
-            if (entity == null) return true;
-            if (!entity.IsValid) return true;
+            if (entity is not { IsValid: true }) return true;
             if (SkippedEntityTypes.AnyF(x => x == entity.Type)) return true;
-            if (IgnoredEntities.AnyF(x => entity?.Path?.Contains(x) == true)) return true;
+            if (IgnoredEntities.AnyF(x => entity.Path?.Contains(x) == true)) return true;
 
             return false;
         }

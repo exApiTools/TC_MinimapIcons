@@ -339,7 +339,7 @@ namespace IconsBuilder.Icons
                     MainTexture.UV = SpriteHelper.GetUV(MyMapIconsIndex.Divination);
                     var name = Entity.GetComponent<Render>().Name;
                     var spaceIndex = name.IndexOf(" ", StringComparison.Ordinal);
-                    Text = spaceIndex != -1 ? name.Substring(0, spaceIndex) : name;
+                    Text = spaceIndex != -1 ? name[..spaceIndex] : name;
                     MainTexture.Color = Color.Pink;
                     if (FossilRarity.TryGetValue(Text, out var clr)) MainTexture.Color = clr;
 
@@ -369,10 +369,9 @@ namespace IconsBuilder.Icons
                     Priority = IconPriority.Critical;
                     MainTexture.Size = settings.SizeChestIcon;
 
-                    if (Entity.GetComponent<Stats>().StatDictionary.TryGetValue(GameStat.MonsterMinimapIcon, out var minimapIconIndex))
-                        MainTexture.UV = SpriteHelper.GetUV((MapIconsIndex)minimapIconIndex);
-                    else
-                        MainTexture.UV = SpriteHelper.GetUV(MyMapIconsIndex.Divination);
+                    MainTexture.UV = Entity.GetComponent<Stats>().StatDictionary.TryGetValue(GameStat.MonsterMinimapIcon, out var minimapIconIndex) 
+                        ? SpriteHelper.GetUV((MapIconsIndex)minimapIconIndex) 
+                        : SpriteHelper.GetUV(MyMapIconsIndex.Divination);
 
                     Text = ((MapIconsIndex)minimapIconIndex).ToString().Replace("Legion", "");
                     MainTexture.Color = Color.White;
@@ -380,7 +379,7 @@ namespace IconsBuilder.Icons
                     break;
                 case ChestType.Heist:
                     {
-                        Text = Entity.Path.Substring(heistPrefix.Length).Trim();
+                        Text = Entity.Path[heistPrefix.Length..].Trim();
                         if (!Text.Contains("Secondary"))        // none-secondary chests already have an icon
                         {
                             Text = string.Empty;
@@ -391,7 +390,7 @@ namespace IconsBuilder.Icons
                         {
                             var indexName = Enum.GetName(typeof(MapIconsIndex), rewardIconIndex);
                             System.Diagnostics.Debug.Assert(indexName != null && indexName.StartsWith("Reward"));
-                            if (Text.Contains(indexName.Substring("Reward".Length)))
+                            if (Text.Contains(indexName["Reward".Length..]))
                             {
                                 MainTexture.FileName = "Icons.png";
                                 MainTexture.UV = SpriteHelper.GetUV(rewardIconIndex);
@@ -410,7 +409,7 @@ namespace IconsBuilder.Icons
                         break;
                     }
                 default:
-                    throw new ArgumentOutOfRangeException("Chest type not found.");
+                    throw new ArgumentOutOfRangeException(nameof(CType), CType, "Chest type not found.");
             }
 
             //Debug, useful for delve chests          

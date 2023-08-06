@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using ExileCore;
 using ExileCore.PoEMemory.Components;
@@ -14,6 +15,12 @@ namespace IconsBuilder.Icons
 {
     public class ChestIcon : BaseIcon
     {
+        private static readonly Dictionary<MapIconsIndex, string> RewardIcons = Enum.GetValues<MapIconsIndex>()
+            .Select(x => (value: x, str: x.ToString()))
+            .Where(x => x.str.StartsWith("Reward", StringComparison.Ordinal))
+            .Select(x => (x.value, x.str["Reward".Length..]))
+            .ToDictionary(x => x.value, x => x.Item2);
+
         public ChestIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
         {
             Update(entity, settings);
@@ -24,7 +31,6 @@ namespace IconsBuilder.Icons
         public void Update(Entity entity, IconsBuilderSettings settings)
         {
             const string heistPrefix = "Metadata/Chests/LeagueHeist/";
-
 
             if (Entity.Path.Contains("BreachChest"))
                 CType = ChestType.Breach;
@@ -50,6 +56,8 @@ namespace IconsBuilder.Icons
                 CType = ChestType.Legion;
             else if (Entity.Path.StartsWith(heistPrefix, StringComparison.Ordinal))
                 CType = ChestType.Heist;
+            else if (Entity.Path.StartsWith("Metadata/Chests/LeaguesExpedition/", StringComparison.Ordinal))
+                CType = ChestType.Expedition;
             else
                 CType = ChestType.SmallChest;
 
@@ -64,27 +72,14 @@ namespace IconsBuilder.Icons
                 return;
             }
 
-            switch (Rarity)
+            MainTexture.Color = Rarity switch
             {
-                case MonsterRarity.White:
-                    MainTexture.Color = Color.White;
-                    break;
-                case MonsterRarity.Magic:
-                    MainTexture.Color = HudSkin.MagicColor;
-                    break;
-
-                case MonsterRarity.Rare:
-                    MainTexture.Color = HudSkin.RareColor;
-                    break;
-
-                case MonsterRarity.Unique:
-                    MainTexture.Color = HudSkin.UniqueColor;
-                    break;
-
-                default:
-                    MainTexture.Color = Color.Purple;
-                    break;
-            }
+                MonsterRarity.White => Color.White,
+                MonsterRarity.Magic => HudSkin.MagicColor,
+                MonsterRarity.Rare => HudSkin.RareColor,
+                MonsterRarity.Unique => HudSkin.UniqueColor,
+                _ => Color.Purple
+            };
 
             switch (CType)
             {
@@ -377,33 +372,43 @@ namespace IconsBuilder.Icons
                     MainTexture.Color = Color.White;
 
                     break;
+                case ChestType.Expedition:
+                    MainTexture.FileName = "Icons.png";
+                    Priority = IconPriority.Critical;
+                    MainTexture.Size = settings.ExpeditionChestIconSize;
+                    MainTexture.Color = Color.White;
+
+                    if (Entity.GetComponent<Stats>().StatDictionary.TryGetValue(GameStat.MonsterMinimapIcon, out var expeditionIconIndex))
+                    {
+                        var iconIndex = (MapIconsIndex)expeditionIconIndex;
+                        MainTexture.UV = SpriteHelper.GetUV(iconIndex);
+                        Text = iconIndex.ToString().Replace("Expedition", "");
+                    }
+                    else
+                        MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.ExpeditionChest2);
+
+                    break;
                 case ChestType.Heist:
                     {
                         Text = Entity.Path[heistPrefix.Length..].Trim();
-                        if (!Text.Contains("Secondary"))        // none-secondary chests already have an icon
+                        MainTexture.FileName = "Icons.png";
+                        if (!Text.Contains("Secondary")) // non-secondary chests already have an icon
                         {
                             Text = string.Empty;
                             break;
                         }
 
-                        for (MapIconsIndex rewardIconIndex = MapIconsIndex.RewardAbyss; rewardIconIndex <= MapIconsIndex.RewardWeapons; rewardIconIndex++)
+                        var index = RewardIcons.FirstOrDefault(x => Text.Contains(x.Value)).Key;
+                        if (index == default)
                         {
-                            var indexName = Enum.GetName(typeof(MapIconsIndex), rewardIconIndex);
-                            System.Diagnostics.Debug.Assert(indexName != null && indexName.StartsWith("Reward"));
-                            if (Text.Contains(indexName["Reward".Length..]))
-                            {
-                                MainTexture.FileName = "Icons.png";
-                                MainTexture.UV = SpriteHelper.GetUV(rewardIconIndex);
-                                goto done;
-                            }
+                            Logger.Log.Warning("Missing icon handling for {0}", Text);
+                            index = MapIconsIndex.RewardChestGeneric;
                         }
-                        Logger.Log.Warning("Missing icon handling for {0}", Text);
-
-                    done: { }
 
                         Priority = IconPriority.Critical;
                         MainTexture.Size = settings.SizeHeistChestIcon;
                         MainTexture.Color = Color.White;
+                        MainTexture.UV = SpriteHelper.GetUV(index);
                         _HasIngameIcon = false; // override
                         Text = string.Empty;
                         break;

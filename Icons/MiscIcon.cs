@@ -40,7 +40,7 @@ namespace IconsBuilder.Icons
 
             if (entity.HasComponent<Targetable>())
             {
-                if (entity.Path.Equals("Metadata/Terrain/Leagues/Synthesis/Objects/SynthesisPortal", StringComparison.Ordinal))
+                if (entity.Path is "Metadata/Terrain/Leagues/Synthesis/Objects/SynthesisPortal")
                     Show = () => entity.IsValid;
                 else
                 {
@@ -102,6 +102,14 @@ namespace IconsBuilder.Icons
                     Text = "Start";
                     Show = () => entity.IsValid && entity.GetComponent<Transitionable>().Flag1 < 3;
                     MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.PartyLeader);
+                }
+                else if (entity.Path is "Metadata/Terrain/Leagues/Sanctum/Objects/SanctumMote")
+                {
+                    Priority = IconPriority.High;
+                    Text = "";
+                    Show = () => entity.IsValid;
+                    MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.BlightPath);
+                    MainTexture.Size = settings.SanctumGoldIconSize;
                 }
             }
         }

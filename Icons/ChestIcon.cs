@@ -30,8 +30,6 @@ namespace IconsBuilder.Icons
 
         public void Update(Entity entity, IconsBuilderSettings settings)
         {
-            const string heistPrefix = "Metadata/Chests/LeagueHeist/";
-
             if (Entity.Path.Contains("BreachChest"))
                 CType = ChestType.Breach;
             else if (Entity.Path.Contains("Metadata/Chests/AbyssChest") ||
@@ -54,7 +52,7 @@ namespace IconsBuilder.Icons
                 CType = ChestType.Synthesis;
             else if (Entity.League == LeagueType.Legion)
                 CType = ChestType.Legion;
-            else if (Entity.Path.StartsWith(heistPrefix, StringComparison.Ordinal))
+            else if (Entity.League == LeagueType.Heist)
                 CType = ChestType.Heist;
             else if (Entity.Path.StartsWith("Metadata/Chests/LeaguesExpedition/", StringComparison.Ordinal))
                 CType = ChestType.Expedition;
@@ -399,7 +397,7 @@ namespace IconsBuilder.Icons
                     break;
                 case ChestType.Heist:
                     {
-                        Text = Entity.Path[heistPrefix.Length..].Trim();
+                        Text = Entity.Path["Metadata/Chests/LeagueHeist/".Length..].Trim();
                         MainTexture.FileName = "Icons.png";
                         if (!Text.Contains("Secondary")) // non-secondary chests already have an icon
                         {

@@ -19,8 +19,6 @@ namespace IconsBuilder.Icons
             Update(entity, settings, modIcons);
         }
 
-        public long ID { get; set; }
-
         public void Update(Entity entity, IconsBuilderSettings settings, Dictionary<string, Size2> modIcons)
         {
             Show = () => entity.IsAlive;
@@ -28,28 +26,17 @@ namespace IconsBuilder.Icons
             {
                 Show = () => !entity.IsHidden && entity.IsAlive;
             }
-            ID = entity.Id;
 
             if (!_HasIngameIcon) MainTexture = new HudTexture("Icons.png");
 
-            switch (Rarity)
+            MainTexture.Size = Rarity switch
             {
-                case MonsterRarity.White:
-                    MainTexture.Size = settings.SizeEntityWhiteIcon;
-                    break;
-                case MonsterRarity.Magic:
-                    MainTexture.Size = settings.SizeEntityMagicIcon;
-                    break;
-                case MonsterRarity.Rare:
-                    MainTexture.Size = settings.SizeEntityRareIcon;
-                    break;
-                case MonsterRarity.Unique:
-                    MainTexture.Size = settings.SizeEntityUniqueIcon;
-                    break;
-                default:
-                    throw new ArgumentException(
-                        $"{nameof(MonsterIcon)} wrong rarity for {entity.Path}. Dump: {entity.GetComponent<ObjectMagicProperties>().DumpObject()}");
-            }
+                MonsterRarity.White => settings.SizeEntityWhiteIcon,
+                MonsterRarity.Magic => settings.SizeEntityMagicIcon,
+                MonsterRarity.Rare => settings.SizeEntityRareIcon,
+                MonsterRarity.Unique => settings.SizeEntityUniqueIcon,
+                _ => throw new ArgumentException($"{nameof(MonsterIcon)} wrong rarity for {entity.Path}. Dump: {entity.GetComponent<ObjectMagicProperties>().DumpObject()}")
+            };
 
             if (_HasIngameIcon && entity.HasComponent<MinimapIcon>() && !entity.GetComponent<MinimapIcon>().Name.Equals("NPC"))
                 return;

@@ -26,26 +26,15 @@ namespace IconsBuilder.Icons
             Show = () => Entity.IsAlive;
 
             MainTexture = new HudTexture("Icons.png");
-            if (!_HasIngameIcon) MainTexture = new HudTexture("Icons.png");
 
-            switch (Rarity)
+            (MainTexture.Size, Text) = Rarity switch
             {
-                case MonsterRarity.White:
-                    MainTexture.Size = settings.SizeEntityWhiteIcon;
-                    break;
-                case MonsterRarity.Magic:
-                    MainTexture.Size = settings.SizeEntityMagicIcon;
-                    break;
-                case MonsterRarity.Rare:
-                    MainTexture.Size = settings.SizeEntityRareIcon;
-                    break;
-                case MonsterRarity.Unique:
-                    MainTexture.Size = settings.SizeEntityUniqueIcon;
-                    Text = entity.RenderName;
-                    break;
-                default:
-                    throw new ArgumentException("Delirium icon rarity corrupted.");
-            }
+                MonsterRarity.White => (MainTexture.Size = settings.SizeEntityWhiteIcon, null),
+                MonsterRarity.Magic => (MainTexture.Size = settings.SizeEntityMagicIcon, null),
+                MonsterRarity.Rare => (MainTexture.Size = settings.SizeEntityRareIcon, null),
+                MonsterRarity.Unique => (MainTexture.Size = settings.SizeEntityUniqueIcon, entity.RenderName),
+                _ => throw new ArgumentException("Delirium icon rarity corrupted.")
+            };
 
             if (_HasIngameIcon && entity.HasComponent<MinimapIcon>() && !entity.GetComponent<MinimapIcon>().Name.Equals("NPC"))
                 return;
@@ -112,32 +101,22 @@ namespace IconsBuilder.Icons
 
                 if (modName != null)
                 {
-                    MainTexture = new HudTexture("sprites.png");
-                    MainTexture.UV = SpriteHelper.GetUV(modIcons[modName], new Size2F(7, 8));
+                    MainTexture = new HudTexture("sprites.png")
+                    {
+                        UV = SpriteHelper.GetUV(modIcons[modName], new Size2F(7, 8))
+                    };
                     Priority = IconPriority.VeryHigh;
                 }
                 else
                 {
-                    switch (Rarity)
+                    (MainTexture.UV, MainTexture.Color) = Rarity switch
                     {
-                        case MonsterRarity.White:
-                            MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeRedCircle);
-                            break;
-                        case MonsterRarity.Magic:
-                            MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeBlueCircle);
-
-                            break;
-                        case MonsterRarity.Rare:
-                            MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeYellowCircle);
-                            break;
-                        case MonsterRarity.Unique:
-                            MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeWhiteHexagon);
-                            MainTexture.Color = Color.DarkOrange;
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(
-                                $"Rarity wrong was is {Rarity}. {entity.GetComponent<ObjectMagicProperties>().DumpObject()}");
-                    }
+                        MonsterRarity.White => (SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeRedCircle), Color.White),
+                        MonsterRarity.Magic => (SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeBlueCircle), Color.White),
+                        MonsterRarity.Rare => (SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeYellowCircle), Color.White),
+                        MonsterRarity.Unique => (SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeWhiteHexagon), Color.DarkOrange),
+                        _ => throw new ArgumentOutOfRangeException($"Rarity wrong was is {Rarity}. {entity.GetComponent<ObjectMagicProperties>().DumpObject()}")
+                    };
                 }
             }
         }

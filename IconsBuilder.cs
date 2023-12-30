@@ -15,8 +15,11 @@ namespace IconsBuilder
 {
     public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
     {
-        private string AlertFile => Path.Combine(DirectoryFullName, "config", "mod_alerts.txt");
-        private string IgnoreFile => Path.Combine(DirectoryFullName, "config", "ignored_entities.txt");
+        private string DefaultAlertFile => Path.Combine(DirectoryFullName, "config", "mod_alerts.txt");
+        private string CustomAlertFile => Path.Combine(ConfigDirectory, "mod_alerts.txt");
+        private string DefaultIgnoreFile => Path.Combine(DirectoryFullName, "config", "ignored_entities.txt");
+        private string CustomIgnoreFile => Path.Combine(ConfigDirectory, "ignored_entities.txt");
+
         private List<string> IgnoredEntities { get; set; }
         private Dictionary<string, Size2> AlertEntitiesWithIconSize { get; set; } = new Dictionary<string, Size2>();
         private static EntityType[] Chests => new[]
@@ -35,35 +38,38 @@ namespace IconsBuilder
             EntityType.Error
         };
 
-        private int RunCounter { get; set; } = 0;
+        private int RunCounter { get; set; }
 
         private void ReadAlertFile()
         {
-            var path = Path.Combine(DirectoryFullName, AlertFile);
-            if (!File.Exists(AlertFile))
+            var customAlertFilePath = CustomAlertFile;
+            var path = File.Exists(customAlertFilePath) ? customAlertFilePath : DefaultAlertFile;
+            if (!File.Exists(path))
             {
                 DebugWindow.LogError($"IconsBuilder -> Alert entities file does not exist. Path: {path}");
                 return;
             }
-            var readAllLines = File.ReadAllLines(AlertFile);
+            var readAllLines = File.ReadAllLines(path);
 
             foreach (var readAllLine in readAllLines)
             {
-                if (readAllLine.StartsWith("#")) continue;
+                if (readAllLine.StartsWith('#')) continue;
                 var entityMetadata = readAllLine.Split(';');
                 var iconSize = entityMetadata[2].Trim().Split(',');
                 AlertEntitiesWithIconSize[entityMetadata[0]] = new Size2(int.Parse(iconSize[0]), int.Parse(iconSize[1]));
             }
         }
+
         private void ReadIgnoreFile()
         {
-            var path = Path.Combine(DirectoryFullName, IgnoreFile);
+            var customIgnoreFilePath = CustomIgnoreFile;
+            var path = File.Exists(customIgnoreFilePath) ? customIgnoreFilePath : DefaultIgnoreFile;
             if (!File.Exists(path))
             {
                 LogError($"IconsBuilder -> Ignored entities file does not exist. Path: {path}");
                 return;
             }
-            IgnoredEntities = File.ReadAllLines(path).Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith("#")).ToList();
+            IgnoredEntities = File.ReadAllLines(path).Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith('#')).ToList();
         }
 
         public override void OnLoad()
@@ -73,6 +79,7 @@ namespace IconsBuilder
 
         public override void AreaChange(AreaInstance area)
         {
+            ReadAlertFile();
             ReadIgnoreFile();
         }
 

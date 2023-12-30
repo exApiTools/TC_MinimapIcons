@@ -224,7 +224,10 @@ namespace MinimapIcons
         {
             if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && !largeMap) return;
 
-            if (/*ingameStateIngameUi.Atlas.IsVisibleLocal ||*/ ingameStateIngameUi.DelveWindow.IsVisibleLocal || ingameStateIngameUi.TreePanel.IsVisibleLocal)
+            if (!Settings.IgnoreFullscreenPanels &&
+                ingameStateIngameUi.FullscreenPanels.Any(x => x.IsVisible) ||
+                !Settings.IgnoreLargePanels &&
+                ingameStateIngameUi.LargePanels.Any(x => x.IsVisible))
                 return;
 
             var playerPositioned = GameController?.Player?.GetComponent<Positioned>();
@@ -265,7 +268,7 @@ namespace MinimapIcons
                     && icon.Entity.Rarity != MonsterRarity.Unique)
                     continue;
 
-                if (icon.HasIngameIcon && !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
+                if (icon.HasIngameIcon && (!Settings.DrawReplacementsForGameIconsWhenOutOfRange || icon.Entity.IsValid) && !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
                     continue;
 
                 if (!icon.Show())

@@ -116,8 +116,10 @@ namespace MinimapIcons
         {
             if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && !largeMap) return;
 
-            if (ingameStateIngameUi.Atlas.IsVisibleLocal || ingameStateIngameUi.DelveWindow.IsVisibleLocal ||
-                ingameStateIngameUi.TreePanel.IsVisibleLocal)
+            if (!Settings.IgnoreFullscreenPanels &&
+                ingameStateIngameUi.FullscreenPanels.Any(x => x.IsVisible) ||
+                !Settings.IgnoreLargePanels &&
+                ingameStateIngameUi.LargePanels.Any(x => x.IsVisible))
                 return;
 
             Positioned playerPositioned = GameController?.Player?.GetComponent<Positioned>();
@@ -205,10 +207,14 @@ namespace MinimapIcons
                         if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
                             continue;
 
-                        if (icon.HasIngameIcon && icon.Entity.Type != EntityType.Monster && icon.Entity.League != LeagueType.Heist)
+                        if (!icon.Show())
                             continue;
 
-                        if (!icon.Show())
+                        if (icon.HasIngameIcon && 
+                            icon.Entity.Type != EntityType.Monster && 
+                            icon.Entity.League != LeagueType.Heist && 
+                            !Settings.DrawReplacementsForGameIconsWhenOutOfRange && 
+                            !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
                             continue;
 
                         var iconZ = icon.Entity.PosNum.Z;

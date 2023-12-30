@@ -15,6 +15,9 @@ namespace MinimapIcons
         public ToggleNode DrawOnlyOnLargeMap { get; set; } = new ToggleNode(true);
         public ToggleNode MultiThreading { get; set; } = new ToggleNode(false);
         public ToggleNode DrawNotValid { get; set; } = new ToggleNode(false);
+        public ToggleNode DrawReplacementsForGameIconsWhenOutOfRange { get; set; } = new ToggleNode(true);
+        public ToggleNode IgnoreFullscreenPanels { get; set; } = new ToggleNode(false);
+        public ToggleNode IgnoreLargePanels { get; set; } = new ToggleNode(false);
         public ToggleNode Enable { get; set; } = new ToggleNode(true);
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System;
-using SharpDX;
+using System.Numerics;
 
 namespace MinimapIcons
 {
     public class MapIcon
     {
-        private const float CameraAngle = 38 * MathUtil.Pi / 180;
+        private const float CameraAngle = 38 * MathF.PI / 180;
         private static readonly double AngleCos = Math.Cos(CameraAngle);
         private static readonly double AngleSin = Math.Sin(CameraAngle);
 

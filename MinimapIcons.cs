@@ -10,6 +10,7 @@ using ExileCore.Shared.Cache;
 using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
 using SharpDX;
+using Vector2 = System.Numerics.Vector2;
 
 namespace MinimapIcons
 {
@@ -206,12 +207,12 @@ namespace MinimapIcons
             if (ingameStateIngameUi.Map.SmallMiniMap.IsVisibleLocal)
             {
                 var mapRect = ingameStateIngameUi.Map.SmallMiniMap.GetClientRectCache;
-                mapCenterCache = mapRect.Center;
+                mapCenterCache = mapRect.Center.ToVector2Num();
                 largeMap = false;
             }
             else if (ingameStateIngameUi.Map.LargeMap.IsVisibleLocal)
             {
-                mapCenterCache = LargeMapRect.TopLeft + LargeMapWindow.DefaultShift + LargeMapWindow.Shift;
+                mapCenterCache = LargeMapRect.TopLeft.ToVector2Num() + LargeMapWindow.DefaultShiftNum + LargeMapWindow.ShiftNum;
                 largeMap = true;
             }
 
@@ -230,8 +231,8 @@ namespace MinimapIcons
             if (playerPositioned == null) return;
             var playerRender = GameController?.Player?.GetComponent<Render>();
             if (playerRender == null) return;
-            var playerPos = WorldPositionExtensions.WorldToGrid(playerRender.Pos);
-            float posZ = playerRender.Pos.Z;
+            var playerPos = playerRender.PosNum.WorldToGrid();
+            float posZ = playerRender.PosNum.Z;
 
             if (LargeMapWindow == null) return;
             var mapWindowLargeMapZoom = LargeMapWindow.Zoom;
@@ -270,14 +271,14 @@ namespace MinimapIcons
                 if (!icon.Show())
                     continue;
 
-                var component = icon?.Entity?.GetComponent<Render>();
-                if (component == null) continue;
-                var iconZ = component.Pos.Z;
+                var iconRender = icon?.Entity?.GetComponent<Render>();
+                if (iconRender == null) continue;
+                var iconZ = iconRender.PosNum.Z;
 
                 //TODO: 240f is probably wrong for minimap, but who plays without the large one?
                 var xyScale = largeMap ? scale : 240f;
                 var zScale = largeMap ? 9f / mapWindowLargeMapZoom : 20;
-                var position = mapCenterCache + MapIcon.DeltaInWorldToMinimapDelta(icon.GridPosition() - playerPos, Diag, xyScale, (iconZ - posZ) / zScale);
+                var position = mapCenterCache + MapIcon.DeltaInWorldToMinimapDelta(icon.GridPositionNum() - playerPos, Diag, xyScale, (iconZ - posZ) / zScale);
 
                 var iconValueMainTexture = icon.MainTexture;
                 var size = iconValueMainTexture.Size;

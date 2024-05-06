@@ -124,6 +124,17 @@ public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
 
     private BaseIcon GenerateIcon(Entity entity)
     {
+        if (Settings.UseReplacementsForGameIconsWhenOutOfRange &&
+            entity.TryGetComponent<MinimapIcon>(out var minimapIconComponent) && 
+            !minimapIconComponent.IsHide)
+        {
+            var name = minimapIconComponent.Name;
+            if (!string.IsNullOrEmpty(name))
+            {
+                return new IngameIconReplacerIcon(entity, Settings);
+            }
+        }
+
         //Monsters
         if (entity.Type == EntityType.Monster)
         {

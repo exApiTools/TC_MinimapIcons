@@ -145,13 +145,13 @@ namespace MinimapIcons
                 if (icon.Entity.Type == EntityType.WorldItem)
                     continue;
 
+                if (!icon.Show())
+                    continue;
+
                 if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
                     continue;
 
                 if (icon.HasIngameIcon && icon.Entity.Type != EntityType.Monster && icon.Entity.League != LeagueType.Heist)
-                    continue;
-
-                if (!icon.Show())
                     continue;
 
                 var component = icon?.Entity?.GetComponent<Render>();
@@ -207,8 +207,6 @@ namespace MinimapIcons
                         if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
                             continue;
 
-                        if (!icon.Show())
-                            continue;
 
                         if (icon.HasIngameIcon && 
                             icon.Entity.Type != EntityType.Monster && 

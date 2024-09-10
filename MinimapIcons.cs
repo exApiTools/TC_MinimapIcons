@@ -48,10 +48,10 @@ namespace MinimapIcons
                 if (ingameStateIngameUi.Map.SmallMiniMap.IsVisibleLocal)
                 {
                     var mapRect = ingameStateIngameUi.Map.SmallMiniMap.GetClientRect();
-                    return (float) (Math.Sqrt(mapRect.Width * mapRect.Width + mapRect.Height * mapRect.Height) / 2f);
+                    return (float)(Math.Sqrt(mapRect.Width * mapRect.Width + mapRect.Height * mapRect.Height) / 2f);
                 }
 
-                return (float) Math.Sqrt(camera.Width * camera.Width + camera.Height * camera.Height);
+                return (float)Math.Sqrt(camera.Width * camera.Width + camera.Height * camera.Height);
             }, 100)).Value;
         private Vector2 screenCenter =>
             new Vector2(MapRect.Width / 2, MapRect.Height / 2 - 20) + new Vector2(MapRect.X, MapRect.Y) +
@@ -114,7 +114,7 @@ namespace MinimapIcons
 
         public override void Render()
         {
-            if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && !largeMap) return;
+            if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && !ingameStateIngameUi.Map.LargeMap.IsVisible) return;
 
             if (!Settings.IgnoreFullscreenPanels &&
                 ingameStateIngameUi.FullscreenPanels.Any(x => x.IsVisible) ||
@@ -208,10 +208,10 @@ namespace MinimapIcons
                             continue;
 
 
-                        if (icon.HasIngameIcon && 
-                            icon.Entity.Type != EntityType.Monster && 
-                            icon.Entity.League != LeagueType.Heist && 
-                            !Settings.DrawReplacementsForGameIconsWhenOutOfRange && 
+                        if (icon.HasIngameIcon &&
+                            icon.Entity.Type != EntityType.Monster &&
+                            icon.Entity.League != LeagueType.Heist &&
+                            !Settings.DrawReplacementsForGameIconsWhenOutOfRange &&
                             !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
                             continue;
 

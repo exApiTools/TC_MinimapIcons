@@ -15,6 +15,7 @@ public class IconsBuilderSettings : ISettings
     public ToggleNode DeliriumText { get; set; } = new ToggleNode(false);
     public ToggleNode HideBurriedMonsters { get; set; } = new ToggleNode(false);
     public ToggleNode UseReplacementsForGameIconsWhenOutOfRange { get; set; } = new ToggleNode(true);
+    public ToggleNode UseReplacementsForItemIconsWhenOutOfRange { get; set; } = new ToggleNode(true);
 
     [Menu("Default size")]
     public float SizeDefaultIcon { get; set; } = new RangeNode<int>(16, 1, 50);

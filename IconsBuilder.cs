@@ -28,7 +28,6 @@ public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
     };
     private static EntityType[] SkippedEntityTypes => new []
     {
-        EntityType.WorldItem, 
         EntityType.HideoutDecoration, 
         EntityType.Effect, 
         EntityType.Light, 
@@ -124,6 +123,21 @@ public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
 
     private BaseIcon GenerateIcon(Entity entity)
     {
+        if (entity.Type == EntityType.WorldItem)
+        {
+            if (Settings.UseReplacementsForItemIconsWhenOutOfRange &&
+                entity.TryGetComponent<WorldItem>(out var worldItem) && 
+                worldItem.Icon is {} icon && 
+                icon != MapIconsIndex.None)
+            {
+                return new IngameItemReplacerIcon(entity, Settings, icon);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         if (Settings.UseReplacementsForGameIconsWhenOutOfRange &&
             entity.TryGetComponent<MinimapIcon>(out var minimapIconComponent) && 
             !minimapIconComponent.IsHide)

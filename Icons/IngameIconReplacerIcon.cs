@@ -5,9 +5,26 @@ using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.MemoryObjects;
 using ExileCore.Shared;
 using ExileCore.Shared.Abstract;
+using ExileCore.Shared.Enums;
 using ExileCore.Shared.Helpers;
 
 namespace IconsBuilder.Icons;
+
+public class IngameItemReplacerIcon : BaseIcon
+{
+    public IngameItemReplacerIcon(Entity entity, IconsBuilderSettings settings, MapIconsIndex mapIconsIndex)
+        : base(entity, settings)
+    {
+        Show = () => !entity.IsValid;
+
+        var iconSizeMultiplier = RemoteMemoryObject.pTheGame.Files.MinimapIcons.EntriesList.ElementAtOrDefault((int)mapIconsIndex)?.LargeMinimapSize ?? 1;
+        MainTexture = new HudTexture("Icons.png")
+        {
+            UV = SpriteHelper.GetUV(mapIconsIndex),
+            Size = RemoteMemoryObject.pTheGame.IngameState.IngameUi.Map.LargeMapZoom * RemoteMemoryObject.pTheGame.IngameState.Camera.Height * iconSizeMultiplier / 64,
+        };
+    }
+}
 
 public class IngameIconReplacerIcon : BaseIcon
 {

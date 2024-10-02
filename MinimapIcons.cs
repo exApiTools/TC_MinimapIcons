@@ -36,7 +36,7 @@ namespace MinimapIcons
 
         private IngameUIElements ingameStateIngameUi;
         private float k;
-        private bool largeMap;
+        private bool? largeMap;
         private float scale;
         private Vector2 screentCenterCache;
         private RectangleF MapRect => _mapRect?.Value ?? (_mapRect = new TimeCache<RectangleF>(() => mapWindow.GetClientRect(), 100)).Value;
@@ -107,6 +107,10 @@ namespace MinimapIcons
                 screentCenterCache = screenCenter;
                 largeMap = true;
             }
+            else
+            {
+                largeMap = null;
+            }
 
             k = camera.Width < 1024f ? 1120f : 1024f;
             scale = k / camera.Height * camera.Width * 3f / 4f / mapWindow.LargeMapZoom;
@@ -114,7 +118,7 @@ namespace MinimapIcons
 
         public override void Render()
         {
-            if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && !ingameStateIngameUi.Map.LargeMap.IsVisible) return;
+            if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && largeMap != true) return;
 
             if (!Settings.IgnoreFullscreenPanels &&
                 ingameStateIngameUi.FullscreenPanels.Any(x => x.IsVisible) ||
@@ -160,15 +164,19 @@ namespace MinimapIcons
 
                 Vector2 position;
 
-                if (largeMap)
+                if (largeMap == true)
                 {
                     position = screentCenterCache + MapIcon.DeltaInWorldToMinimapDelta(
                                    icon.GridPositionNum() - playerPos, diag, scale, (iconZ - posZ) / (9f / mapWindowLargeMapZoom));
                 }
-                else
+                else if (largeMap == false)
                 {
                     position = screentCenterCache +
                                MapIcon.DeltaInWorldToMinimapDelta(icon.GridPositionNum() - playerPos, diag, 240f, (iconZ - posZ) / 20);
+                }
+                else
+                {
+                    continue;
                 }
 
                 var iconValueMainTexture = icon.MainTexture;
@@ -218,15 +226,19 @@ namespace MinimapIcons
                         var iconZ = icon.Entity.PosNum.Z;
                         Vector2 position;
 
-                        if (largeMap)
+                        if (largeMap == true)
                         {
                             position = screentCenterCache + MapIcon.DeltaInWorldToMinimapDelta(
                                 icon.GridPositionNum() - playerPos, diag, scale, (iconZ - posZ) / (9f / mapWindowLargeMapZoom));
                         }
-                        else
+                        else if (largeMap == false)
                         {
                             position = screentCenterCache +
                                        MapIcon.DeltaInWorldToMinimapDelta(icon.GridPositionNum() - playerPos, diag, 240f, (iconZ - posZ) / 20);
+                        }
+                        else
+                        {
+                            continue;
                         }
 
                         HudTexture iconValueMainTexture = icon.MainTexture;

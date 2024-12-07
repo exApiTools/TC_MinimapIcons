@@ -1,19 +1,18 @@
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared;
-using ExileCore.Shared.Abstract;
-using ExileCore.Shared.Helpers;
-using SharpDX;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared;
+using ExileCore2.Shared.Helpers;
+using GameOffsets2.Native;
 
-namespace IconsBuilder.Icons;
+namespace MinimapIcons.IconsBuilder.Icons;
 
 public class MissionMarkerIcon : BaseIcon
 {
-    public MissionMarkerIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
+    public MissionMarkerIcon(Entity entity, IconsBuilderSettings settings) : base(entity)
     {
         MainTexture = new HudTexture();
         MainTexture.FileName = "Icons.png";
-        MainTexture.UV = SpriteHelper.GetUV(16, new Size2F(14, 14));
+        MainTexture.UV = SpriteHelper.GetUV(16, new Vector2i(14, 14));
 
         Show = () =>
         {

@@ -1,6 +1,6 @@
-﻿using ExileCore.Shared.Attributes;
-using ExileCore.Shared.Interfaces;
-using ExileCore.Shared.Nodes;
+﻿using ExileCore2.Shared.Interfaces;
+using ExileCore2.Shared.Nodes;
+using MinimapIcons.IconsBuilder;
 
 namespace MinimapIcons;
 
@@ -15,4 +15,6 @@ public class MapIconsSettings : ISettings
     public ToggleNode IgnoreLargePanels { get; set; } = new ToggleNode(false);
     public ToggleNode Enable { get; set; } = new ToggleNode(true);
     public RangeNode<int> IconListRefreshPeriod { get; set; } = new RangeNode<int>(100, 0, 1000);
+
+    public IconsBuilderSettings IconsBuilderSettings { get; set; } = new();
 }

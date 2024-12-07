@@ -1,12 +1,11 @@
-﻿using ExileCore.Shared.Attributes;
-using ExileCore.Shared.Interfaces;
-using ExileCore.Shared.Nodes;
+﻿using ExileCore2.Shared.Attributes;
+using ExileCore2.Shared.Nodes;
 
-namespace IconsBuilder;
+namespace MinimapIcons.IconsBuilder;
 
-public class IconsBuilderSettings : ISettings
+[Submenu]
+public class IconsBuilderSettings
 {
-    public ToggleNode Enable { get; set; } = new ToggleNode(true);
     public RangeNode<int> RunEveryXTicks { get; set; } = new RangeNode<int>(10, 1, 20);
     [Menu("Debug information about entities")]
     public ToggleNode LogDebugInformation { get; set; } = new ToggleNode(true);

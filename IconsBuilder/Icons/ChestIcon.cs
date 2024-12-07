@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using ExileCore;
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared;
-using ExileCore.Shared.Abstract;
-using ExileCore.Shared.Enums;
-using ExileCore.Shared.Helpers;
-using ExileCore.Shared.Static;
-using SharpDX;
+using ExileCore2;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared;
+using ExileCore2.Shared.Enums;
+using ExileCore2.Shared.Helpers;
+using GameOffsets2.Native;
 
-namespace IconsBuilder.Icons;
+namespace MinimapIcons.IconsBuilder.Icons;
 
 public class ChestIcon : BaseIcon
 {
@@ -21,7 +20,7 @@ public class ChestIcon : BaseIcon
         .Select(x => (x.value, x.str["Reward".Length..]))
         .ToDictionary(x => x.value, x => x.Item2);
 
-    public ChestIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
+    public ChestIcon(Entity entity, IconsBuilderSettings settings) : base(entity)
     {
         Update(entity, settings);
     }
@@ -75,9 +74,9 @@ public class ChestIcon : BaseIcon
         MainTexture.Color = Rarity switch
         {
             MonsterRarity.White => Color.White,
-            MonsterRarity.Magic => HudSkin.MagicColor,
-            MonsterRarity.Rare => HudSkin.RareColor,
-            MonsterRarity.Unique => HudSkin.UniqueColor,
+            MonsterRarity.Magic => Color.FromArgb(136, 136, 255),
+            MonsterRarity.Rare => Color.FromArgb(255, 255, 119),
+            MonsterRarity.Unique => Color.FromArgb(175, 96, 37),
             _ => Color.Purple
         };
 
@@ -89,15 +88,15 @@ public class ChestIcon : BaseIcon
                 if (Entity.Path.Contains("Large"))
                 {
                     MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/StrongboxDivination"],
-                        new Size2F(7, 8));
+                        new Vector2i(7, 8));
 
-                    MainTexture.Color = new ColorBGRA(240, 100, 255, 255);
+                    MainTexture.Color = Color.FromArgb(240, 100, 255);
                     Text = "Big Breach";
                 }
                 else
                 {
-                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Large"], new Size2F(7, 8));
-                    MainTexture.Color = new ColorBGRA(240, 100, 255, 255);
+                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Large"], new Vector2i(7, 8));
+                    MainTexture.Color = Color.FromArgb(240, 100, 255);
                     Text = "Breach chest";
                 }
 
@@ -107,14 +106,14 @@ public class ChestIcon : BaseIcon
 
                 if (Entity.Path.Contains("AbyssFinalChest"))
                 {
-                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/AbyssChest"], new Size2F(7, 8));
+                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/AbyssChest"], new Vector2i(7, 8));
                     MainTexture.Color = Color.GreenYellow;
                     Text = Entity.GetComponent<Render>()?.Name;
                 }
                 else if (Entity.Path.Contains("AbyssChest"))
                 {
                     MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/StrongboxDivination"],
-                        new Size2F(7, 8));
+                        new Vector2i(7, 8));
 
                     MainTexture.Color = Color.GreenYellow;
                 }
@@ -122,7 +121,7 @@ public class ChestIcon : BaseIcon
                 break;
             case ChestType.Incursion:
                 MainTexture.Size = settings.SizeChestIcon;
-                MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/StrongboxDivination"], new Size2F(7, 8));
+                MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/StrongboxDivination"], new Vector2i(7, 8));
                 MainTexture.Color = Color.OrangeRed;
                 Text = Entity.Path.Replace("Metadata/Chests/IncursionChest", "").Replace("s/IncursionChest", "");
                 break;
@@ -286,7 +285,7 @@ public class ChestIcon : BaseIcon
                 }
 
                 else
-                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Large"], new Size2F(7, 8));
+                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Large"], new Vector2i(7, 8));
 
                 if (Entity.Path.EndsWith("3") || Entity.Path.EndsWith("2_1")) MainTexture.Color = Color.Magenta;
 
@@ -296,7 +295,7 @@ public class ChestIcon : BaseIcon
 
                 if (strongboxesUV.TryGetValue(Entity.Path, out var result))
                 {
-                    MainTexture.UV = SpriteHelper.GetUV(result, new Size2F(7, 8));
+                    MainTexture.UV = SpriteHelper.GetUV(result, new Vector2i(7, 8));
                     Text = Entity.GetComponent<Render>()?.Name;
                 }
                 else
@@ -312,13 +311,13 @@ public class ChestIcon : BaseIcon
 
                 if (Entity.Path.Contains("VaultTreasurePile"))
                 {
-                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Arcanist"], new Size2F(7, 8));
+                    MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Arcanist"], new Vector2i(7, 8));
                     MainTexture.Color = Color.Yellow;
                 }
                 else if (Entity.Path.Contains("SideArea/SideAreaChest"))
                 {
                     MainTexture.FileName = "Icons.png";
-                    MainTexture.UV = SpriteHelper.GetUV(new Size2(4, 6), Constants.MapIconsSize);
+                    MainTexture.UV = SpriteHelper.GetUV(new Vector2i(4, 6), Constants.MapIconsSize);
                 }
                 else
                 {
@@ -342,7 +341,7 @@ public class ChestIcon : BaseIcon
                 break;
             case ChestType.Perandus:
                 MainTexture.Size = settings.SizeChestIcon;
-                MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Large"], new Size2F(7, 8));
+                MainTexture.UV = SpriteHelper.GetUV(strongboxesUV["Metadata/Chests/StrongBoxes/Large"], new Vector2i(7, 8));
                 MainTexture.Color = Color.LightGreen;
                 Text = Entity.GetComponent<Render>()?.Name;
                 break;
@@ -408,7 +407,7 @@ public class ChestIcon : BaseIcon
                 var index = RewardIcons.FirstOrDefault(x => Text.Contains(x.Value)).Key;
                 if (index == default)
                 {
-                    Logger.Log.Warning("Missing icon handling for {0}", Text);
+                    DebugWindow.LogMsg($"Missing icon handling for {Text}");
                     index = MapIconsIndex.RewardChestGeneric;
                 }
 
@@ -427,14 +426,14 @@ public class ChestIcon : BaseIcon
         //Debug, useful for delve chests          
         if (settings.LogDebugInformation && Show())
         {
-            Logger.Log.Information(
+            DebugWindow.LogMsg(
                 $"Chest debug -> CType:{CType} Path: {Entity.Path} #\t\tText: {Text} #\t\tRender Name: {Entity.GetComponent<Render>().Name}");
 
             if (Entity.GetComponent<Stats>()?.StatDictionary != null)
             {
                 foreach (var i in Entity.GetComponent<Stats>().StatDictionary)
                 {
-                    Logger.Log.Information($"Stat: {i.Key} = {i.Value}");
+                    DebugWindow.LogMsg($"Stat: {i.Key} = {i.Value}");
                 }
             }
 
@@ -442,7 +441,7 @@ public class ChestIcon : BaseIcon
             {
                 foreach (var mod in Entity.GetComponent<ObjectMagicProperties>().Mods)
                 {
-                    Logger.Log.Information($"Mods: {mod}");
+                    DebugWindow.LogMsg($"Mods: {mod}");
                 }
             }
         }

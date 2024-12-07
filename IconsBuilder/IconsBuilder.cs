@@ -2,25 +2,33 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using ExileCore;
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared.Abstract;
-using ExileCore.Shared.Enums;
-using IconsBuilder.Icons;
-using SharpDX;
+using ExileCore2;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared.Enums;
+using GameOffsets2.Native;
+using MinimapIcons.IconsBuilder.Icons;
 
-namespace IconsBuilder;
+namespace MinimapIcons.IconsBuilder;
 
-public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
+public class IconsBuilder
 {
-    private string DefaultAlertFile => Path.Combine(DirectoryFullName, "config", "mod_alerts.txt");
-    private string CustomAlertFile => Path.Combine(ConfigDirectory, "mod_alerts.txt");
-    private string DefaultIgnoreFile => Path.Combine(DirectoryFullName, "config", "ignored_entities.txt");
-    private string CustomIgnoreFile => Path.Combine(ConfigDirectory, "ignored_entities.txt");
+    private readonly MinimapIcons _plugin;
+
+    public IconsBuilder(MinimapIcons plugin)
+    {
+        _plugin = plugin;
+    }
+
+    public IconsBuilderSettings Settings => _plugin.Settings.IconsBuilderSettings;
+
+    private string DefaultAlertFile => Path.Combine(_plugin.DirectoryFullName, "config", "mod_alerts.txt");
+    private string CustomAlertFile => Path.Combine(_plugin.ConfigDirectory, "mod_alerts.txt");
+    private string DefaultIgnoreFile => Path.Combine(_plugin.DirectoryFullName, "config", "ignored_entities.txt");
+    private string CustomIgnoreFile => Path.Combine(_plugin.ConfigDirectory, "ignored_entities.txt");
 
     private List<string> IgnoredEntities { get; set; }
-    private Dictionary<string, Size2> AlertEntitiesWithIconSize { get; set; } = new Dictionary<string, Size2>();
+    private Dictionary<string, Vector2i> AlertEntitiesWithIconSize { get; set; } = new Dictionary<string, Vector2i>();
     private static EntityType[] Chests => new[]
     {
         EntityType.Chest,
@@ -54,7 +62,7 @@ public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
             if (readAllLine.StartsWith('#')) continue;
             var entityMetadata = readAllLine.Split(';');
             var iconSize = entityMetadata[2].Trim().Split(',');
-            AlertEntitiesWithIconSize[entityMetadata[0]] = new Size2(int.Parse(iconSize[0]), int.Parse(iconSize[1]));
+            AlertEntitiesWithIconSize[entityMetadata[0]] = new Vector2i(int.Parse(iconSize[0]), int.Parse(iconSize[1]));
         }
     }
 
@@ -64,43 +72,36 @@ public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
         var path = File.Exists(customIgnoreFilePath) ? customIgnoreFilePath : DefaultIgnoreFile;
         if (!File.Exists(path))
         {
-            LogError($"IconsBuilder -> Ignored entities file does not exist. Path: {path}");
+           _plugin.LogError($"IconsBuilder -> Ignored entities file does not exist. Path: {path}");
             return;
         }
         IgnoredEntities = File.ReadAllLines(path).Where(line => !string.IsNullOrWhiteSpace(line) && !line.StartsWith('#')).ToList();
     }
 
-    public override void OnLoad()
-    {
-        Graphics.InitImage("sprites.png");
-    }
-
-    public override void AreaChange(AreaInstance area)
+    public void AreaChange(AreaInstance area)
     {
         ReadAlertFile();
         ReadIgnoreFile();
     }
 
-    public override bool Initialise()
+    public bool Initialise()
     {
         ReadAlertFile();           
         ReadIgnoreFile();
         return true;
     }
 
-    public override Job Tick()
+    public void Tick()
     {
-        if (!Settings.Enable.Value) return null;
         RunCounter++;
-        if (RunCounter % Settings.RunEveryXTicks.Value != 0) return null;
+        if (RunCounter % Settings.RunEveryXTicks.Value != 0) return;
 
         AddIcons();
-        return null;
     }
 
     private void AddIcons()
     {
-        foreach (var entity in GameController.Entities)
+        foreach (var entity in _plugin.GameController.Entities)
         {
             if (entity.GetHudComponent<BaseIcon>() != null) continue;
             if (SkipIcon(entity)) continue;
@@ -169,8 +170,8 @@ public class IconsBuilder : BaseSettingsPlugin<IconsBuilderSettings>
         //Player
         if (entity.Type == EntityType.Player)
         {
-            if (GameController.IngameState.Data.LocalPlayer.Address == entity.Address ||
-                GameController.IngameState.Data.LocalPlayer.GetComponent<Render>().Name == entity.RenderName) return null;
+            if (_plugin.GameController.IngameState.Data.LocalPlayer.Address == entity.Address ||
+                _plugin.GameController.IngameState.Data.LocalPlayer.GetComponent<Render>().Name == entity.RenderName) return null;
 
             if (!entity.IsValid) return null;
             return new PlayerIcon(entity, Settings);

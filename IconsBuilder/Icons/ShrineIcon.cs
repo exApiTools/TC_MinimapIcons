@@ -1,15 +1,14 @@
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared;
-using ExileCore.Shared.Abstract;
-using ExileCore.Shared.Enums;
-using ExileCore.Shared.Helpers;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared;
+using ExileCore2.Shared.Enums;
+using ExileCore2.Shared.Helpers;
 
-namespace IconsBuilder.Icons;
+namespace MinimapIcons.IconsBuilder.Icons;
 
 public class ShrineIcon : BaseIcon
 {
-    public ShrineIcon(Entity entity, IconsBuilderSettings settings) : base(entity, settings)
+    public ShrineIcon(Entity entity, IconsBuilderSettings settings) : base(entity)
     {
         MainTexture = new HudTexture("Icons.png");
         MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.Shrine);

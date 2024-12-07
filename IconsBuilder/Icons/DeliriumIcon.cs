@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared;
-using ExileCore.Shared.Abstract;
-using ExileCore.Shared.Enums;
-using ExileCore.Shared.Helpers;
-using SharpDX;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared;
+using ExileCore2.Shared.Enums;
+using ExileCore2.Shared.Helpers;
+using GameOffsets2.Native;
 
-namespace IconsBuilder.Icons;
+namespace MinimapIcons.IconsBuilder.Icons;
 
 internal class DeliriumIcon : BaseIcon
 {
-    public DeliriumIcon(Entity entity, IconsBuilderSettings settings, Dictionary<string, Size2> modIcons) : base(entity, settings)
+    public DeliriumIcon(Entity entity, IconsBuilderSettings settings, Dictionary<string, Vector2i> modIcons) : base(entity)
     {
         Update(entity, settings, modIcons);
     }
@@ -23,7 +23,7 @@ internal class DeliriumIcon : BaseIcon
         return $"{Entity.Metadata} : {Entity.Type} ({Entity.Address}) T: {Text}";
     }
 
-    public void Update(Entity entity, IconsBuilderSettings settings, Dictionary<string, Size2> modIcons)
+    public void Update(Entity entity, IconsBuilderSettings settings, Dictionary<string, Vector2i> modIcons)
     {
         Show = () => Entity.IsAlive;
 
@@ -107,7 +107,7 @@ internal class DeliriumIcon : BaseIcon
             {
                 MainTexture = new HudTexture("sprites.png")
                 {
-                    UV = SpriteHelper.GetUV(modIcons[modName], new Size2F(7, 8))
+                    UV = SpriteHelper.GetUV(modIcons[modName], new Vector2i(7, 8))
                 };
                 Priority = IconPriority.VeryHigh;
             }

@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using ExileCore;
-using ExileCore.PoEMemory.Components;
-using ExileCore.PoEMemory.Elements;
-using ExileCore.PoEMemory.MemoryObjects;
-using ExileCore.Shared.Abstract;
-using ExileCore.Shared.Cache;
-using ExileCore.Shared.Enums;
-using ExileCore.Shared.Helpers;
-using SharpDX;
+using ExileCore2;
+using ExileCore2.PoEMemory.Components;
+using ExileCore2.PoEMemory.Elements;
+using ExileCore2.PoEMemory.MemoryObjects;
+using ExileCore2.Shared.Cache;
+using ExileCore2.Shared.Enums;
+using ExileCore2.Shared.Helpers;
+using MinimapIcons.IconsBuilder.Icons;
+using RectangleF = ExileCore2.Shared.RectangleF;
 using Vector2 = System.Numerics.Vector2;
 
 namespace MinimapIcons;
@@ -156,20 +157,28 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
     private readonly Dictionary<string, bool> IgnoreCache = new Dictionary<string, bool>();
 
     private IngameUIElements _ingameUi;
-    private bool _largeMap;
+    private bool? _largeMap;
     private float _mapScale;
     private Vector2 _mapCenter;
     private SubMap LargeMapWindow => GameController.Game.IngameState.IngameUi.Map.LargeMap;
     private CachedValue<List<BaseIcon>> _iconListCache;
+    private IconsBuilder.IconsBuilder _iconsBuilder;
+    private IconsBuilder.IconsBuilder IconsBuilder => _iconsBuilder ??= new IconsBuilder.IconsBuilder(this);
 
     public override bool Initialise()
     {
+        IconsBuilder.Initialise();
         Graphics.InitImage("sprites.png");
         Graphics.InitImage("Icons.png");
         CanUseMultiThreading = true;
         _iconListCache = CreateIconListCache();
         Settings.IconListRefreshPeriod.OnValueChanged += (_, _) => CreateIconListCache();
         return true;
+    }
+
+    public override void AreaChange(AreaInstance area)
+    {
+        IconsBuilder.AreaChange(area);
     }
 
     private TimeCache<List<BaseIcon>> CreateIconListCache()
@@ -187,15 +196,16 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
         }, Settings.IconListRefreshPeriod);
     }
 
-    public override Job Tick()
+    public override void Tick()
     {
+        IconsBuilder.Tick();
         _ingameUi = GameController.Game.IngameState.IngameUi;
 
         var smallMiniMap = _ingameUi.Map.SmallMiniMap;
-        if (smallMiniMap.IsVisibleLocal)
+        if (smallMiniMap.IsValid && smallMiniMap.IsVisibleLocal)
         {
             var mapRect = smallMiniMap.GetClientRectCache;
-            _mapCenter = mapRect.Center.ToVector2Num();
+            _mapCenter = mapRect.Center;
             _largeMap = false;
             _mapScale = smallMiniMap.MapScale;
         }
@@ -206,13 +216,19 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
             _largeMap = true;
             _mapScale = largeMapWindow.MapScale;
         }
-
-        return null;
+        else
+        {
+            _largeMap = null;
+        }
     }
 
     public override void Render()
     {
-        if (!Settings.Enable.Value || !GameController.InGame || Settings.DrawOnlyOnLargeMap && !_largeMap) return;
+        if (!Settings.Enable.Value || 
+            _largeMap == null || 
+            !GameController.InGame ||
+            Settings.DrawOnlyOnLargeMap && _largeMap != true) 
+            return;
 
         if (!Settings.IgnoreFullscreenPanels &&
             _ingameUi.FullscreenPanels.Any(x => x.IsVisible) ||
@@ -222,7 +238,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
 
         var playerRender = GameController?.Player?.GetComponent<Render>();
         if (playerRender == null) return;
-        var playerPos = playerRender.PosNum.WorldToGrid();
+        var playerPos = playerRender.Pos.WorldToGrid();
         var playerHeight = -playerRender.UnclampedHeight;
 
         if (LargeMapWindow == null) return;
@@ -253,7 +269,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
                 !icon.Entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveWall"))
                 continue;
 
-            var iconGridPos = icon.GridPositionNum();
+            var iconGridPos = icon.GridPosition();
             var position = _mapCenter +
                            DeltaInWorldToMinimapDelta(iconGridPos - playerPos,
                                (playerHeight + GameController.IngameState.Data.GetTerrainHeightAt(iconGridPos)) * PoeMapExtension.WorldToGridConversion);
@@ -263,12 +279,8 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
             var halfSize = size / 2f;
             icon.DrawRect = new RectangleF(position.X - halfSize, position.Y - halfSize, size, size);
             var drawRect = icon.DrawRect;
-            if (!_largeMap)
-            {
-                _ingameUi.Map.SmallMiniMap.GetClientRectCache.Contains(ref drawRect, out var contains);
-                if (!contains)
-                    continue;
-            }
+            if (_largeMap == false && !_ingameUi.Map.SmallMiniMap.GetClientRectCache.Contains(drawRect)) 
+                continue;
 
             Graphics.DrawImage(iconValueMainTexture.FileName, drawRect, iconValueMainTexture.UV, iconValueMainTexture.Color);
             if (icon.Hidden())

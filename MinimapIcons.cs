@@ -234,9 +234,6 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
         {
             if (icon?.Entity == null) continue;
 
-            if (icon.Entity.Type == EntityType.WorldItem)
-                continue;
-
             if (!Settings.DrawMonsters && icon.Entity.Type == EntityType.Monster)
                 continue;
 
@@ -244,7 +241,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
                 continue;
 
             if (icon.Entity.Path.StartsWith(
-                    "Metadata/Monsters/AtlasExiles/BasiliskInfluenceMonsters/BasiliskBurrowingViper")
+                    "Metadata/Monsters/AtlasExiles/BasiliskInfluenceMonsters/BasiliskBurrowingViper", StringComparison.Ordinal)
                 && icon.Entity.Rarity != MonsterRarity.Unique)
                 continue;
 

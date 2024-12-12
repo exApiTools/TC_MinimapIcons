@@ -94,7 +94,7 @@ public class LegionIcon : BaseIcon
 
             if (statDictionary.Count == 0)
             {
-                statDictionary = entity.GetComponentFromMemory<Stats>()?.ParseStats() ?? statDictionary;
+                statDictionary = entity.GetComponentFromMemory<Stats>()?.StatDictionary ?? statDictionary;
                 if (statDictionary.Count == 0) Text = "Error";
             }
 

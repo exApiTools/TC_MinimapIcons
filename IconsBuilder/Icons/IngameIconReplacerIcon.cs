@@ -27,7 +27,7 @@ public class IngameItemReplacerIcon : BaseIcon
 
 public class IngameIconReplacerIcon : BaseIcon
 {
-    public IngameIconReplacerIcon(Entity entity, IconsBuilderSettings settings)
+    public IngameIconReplacerIcon(Entity entity, IconsBuilderSettings settings, MapIconsSettings mapIconsSettings)
         : base(entity)
     {
         var isHidden = false;
@@ -44,7 +44,7 @@ public class IngameIconReplacerIcon : BaseIcon
                      Update(ref transitionableFlag1, () => entity.GetComponent<Transitionable>()?.Flag1 ?? 1) == 1 &&
                      Update(ref shrineIsAvailable, () => entity.GetComponent<Shrine>()?.IsAvailable ?? shrineIsAvailable) &&
                      !Update(ref isOpened, () => entity.GetComponent<Chest>()?.IsOpened ?? isOpened) &&
-                     !entity.IsValid;
+                     (!entity.IsValid || mapIconsSettings.AlwaysShownIngameIcons.Content.Any(x => x.Value.Equals(entity.Path)));
         var name = entity.GetComponent<MinimapIcon>()?.Name ?? "";
         var iconIndexByName = ExileCore2.Shared.Helpers.Extensions.IconIndexByName(name);
 

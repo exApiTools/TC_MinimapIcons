@@ -146,7 +146,7 @@ public class IconsBuilder
             var name = minimapIconComponent.Name;
             if (!string.IsNullOrEmpty(name))
             {
-                return new IngameIconReplacerIcon(entity, Settings);
+                return new IngameIconReplacerIcon(entity, Settings, _plugin.Settings);
             }
         }
 
@@ -155,8 +155,6 @@ public class IconsBuilder
         {
             if (!entity.IsAlive) return null;
 
-            if (entity.League == LeagueType.Legion)
-                return new LegionIcon(entity, Settings, AlertEntitiesWithIconSize);
             if (entity.League == LeagueType.Delirium)
                 return new DeliriumIcon(entity, Settings, AlertEntitiesWithIconSize);
 
@@ -200,8 +198,6 @@ public class IconsBuilder
         }
 
         if (entity.HasComponent<MinimapIcon>() && entity.HasComponent<Targetable>() ||
-            entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/EncounterControlObjects/AzuriteEncounterController") ||
-            entity.Type == EntityType.LegionMonolith ||
             entity.Path is "Metadata/Terrain/Leagues/Sanctum/Objects/SanctumMote")
             return new MiscIcon(entity, Settings);
 

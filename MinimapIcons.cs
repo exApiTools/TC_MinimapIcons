@@ -86,8 +86,6 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
 
     public override void Render()
     {
-        var center = GameController.Window.GetWindowRectangleTimeCache with{Location = Vector2.Zero};
-        Graphics.DrawLine(center.Center, center.Center + Vector2.One.Rotate(DateTime.UtcNow.Millisecond * 360f / 1000) * 100, 10, Color.Red, Color.Green);
         if (_largeMap == null || 
             !GameController.InGame ||
             Settings.DrawOnlyOnLargeMap && _largeMap != true) 

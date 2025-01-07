@@ -20,4 +20,8 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="ImGui.NET" Version="1.90.0.1" />
+  </ItemGroup>
 </Project>

@@ -41,22 +41,15 @@ internal class DeliriumIcon : BaseIcon
         if (_HasIngameIcon && entity.HasComponent<MinimapIcon>() && !entity.GetComponent<MinimapIcon>().Name.Equals("NPC"))
             return;
 
-        if (entity.Path.StartsWith("Metadata/Monsters/LeagueAffliction/DoodadDaemons", StringComparison.Ordinal))
+        if (entity.Path.StartsWith("Metadata/Monsters/LeagueDelirium/DoodadDaemons", StringComparison.Ordinal))
         {
-            var pathstring = "Metadata/Monsters/LeagueAffliction/DoodadDaemons/DoodadDaemon";
-            //proximity spawning volatile ->bad
-            if (entity.Path.StartsWith(pathstring + "BloodBag", StringComparison.Ordinal))
-            {
-                MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.RedFlag);
-                Text = settings.DeliriumText.Value ? "Avoid" : "";
-            }
-            else if (entity.Path.StartsWith(pathstring + "EggFodder", StringComparison.Ordinal))
-            {
-                MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.NPC);
-            }
-            else if (entity.Path.StartsWith(pathstring + "GlobSpawn", StringComparison.Ordinal))
+            if (entity.Path.Contains("ShardPack", StringComparison.OrdinalIgnoreCase))
             {
                 MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.MyPlayer);
+                MainTexture.Size = settings.SizeEntityProximityMonsterIcon;
+                Hidden = () => false;
+                Priority = IconPriority.Medium;
+                return;
             }
             else
             {
@@ -64,12 +57,6 @@ internal class DeliriumIcon : BaseIcon
                 MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.QuestObject);
                 return;
             }
-
-            MainTexture.Size = settings.SizeEntityProximityMonsterIcon;
-            Hidden = () => false;
-
-            Priority = IconPriority.Medium;
-            return;
         }
 
         if (!entity.IsHostile)

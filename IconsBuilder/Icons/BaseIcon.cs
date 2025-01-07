@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using System.Numerics;
 using ExileCore2.PoEMemory.Components;
 using ExileCore2.PoEMemory.MemoryObjects;
@@ -15,6 +13,8 @@ namespace MinimapIcons.IconsBuilder.Icons;
 
 public abstract class BaseIcon
 {
+    public int Version;
+
     protected static readonly Dictionary<string, Vector2i> strongboxesUV = new Dictionary<string, Vector2i>
     {
         { "Metadata/Chests/StrongBoxes/Large", new Vector2i(7, 7) },
@@ -32,35 +32,6 @@ public abstract class BaseIcon
         { "Metadata/Chests/StrongBoxes/Gemcutter", new Vector2i(6, 1) },
         { "Metadata/Chests/StrongBoxes/StrongboxDivination", new Vector2i(7, 1) },
         { "Metadata/Chests/AbyssChest", new Vector2i(7, 7) }
-    };
-
-    protected static readonly Dictionary<string, Color> FossilRarity = new Dictionary<string, Color>
-    {
-        { "Fractured", Color.Aquamarine },
-        { "Faceted", Color.Aquamarine },
-        { "Glyphic", Color.Aquamarine },
-        { "Hollow", Color.Aquamarine },
-        { "Shuddering", Color.Aquamarine },
-        { "Bloodstained", Color.Aquamarine },
-        { "Tangled", Color.OrangeRed },
-        { "Dense", Color.OrangeRed },
-        { "Gilded", Color.OrangeRed },
-        { "Sanctified", Color.Aquamarine },
-        { "Encrusted", Color.Yellow },
-        { "Aetheric", Color.Orange },
-        { "Enchanted", Color.Orange },
-        { "Pristine", Color.Orange },
-        { "Prismatic", Color.Orange },
-        { "Corroded", Color.Yellow },
-        { "Perfect", Color.Orange },
-        { "Jagged", Color.Yellow },
-        { "Serrated", Color.Yellow },
-        { "Bound", Color.Yellow },
-        { "Lucent", Color.Yellow },
-        { "Metallic", Color.Yellow },
-        { "Scorched", Color.Yellow },
-        { "Aberrant", Color.Yellow },
-        { "Frigid", Color.Yellow }
     };
 
     protected bool _HasIngameIcon;
@@ -93,51 +64,27 @@ public abstract class BaseIcon
         {
             var name = minimapIconComponent.Name;
 
-            if (!string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
             {
-                var iconIndexByName = ExileCore2.Shared.Helpers.Extensions.IconIndexByName(name);
+                return;
+            }
 
-                if (iconIndexByName != MapIconsIndex.MyPlayer)
-                {
-                    MainTexture = new HudTexture("Icons.png") { UV = SpriteHelper.GetUV(iconIndexByName), Size = 16 };
-                    _HasIngameIcon = true;
-                }
+            var iconIndexByName = ExileCore2.Shared.Helpers.Extensions.IconIndexByName(name);
 
-                if (Entity.HasComponent<Portal>() && Entity.TryGetComponent<Transitionable>(out var transitionable))
-                {
-                    Text = RenderName;
-                    Show = () => Entity.IsValid && transitionable.Flag1 == 2;
-                }
-                else if (Entity.Path.StartsWith("Metadata/Terrain/Labyrinth/Objects/Puzzle_Parts/Switch", StringComparison.Ordinal))
-                {
-                    Show = () =>
-                    {
-                        var transitionable = Entity.GetComponent<Transitionable>();
-                        var minimapIcon = Entity.GetComponent<MinimapIcon>();
-                        return Entity.IsValid && minimapIcon is { IsVisible: true, IsHide: false } && transitionable?.Flag1 != 2;
-                    };
-                }
-                else if (Entity.Path.StartsWith("Metadata/MiscellaneousObjects/Abyss/Abyss"))
-                {
-                    Show = () =>
-                    {
-                        var minimapIcon = Entity.GetComponent<MinimapIcon>();
+            if (iconIndexByName != MapIconsIndex.MyPlayer)
+            {
+                MainTexture = new HudTexture("Icons.png") { UV = SpriteHelper.GetUV(iconIndexByName), Size = 16 };
+                _HasIngameIcon = true;
+            }
 
-                        return Entity.IsValid && minimapIcon?.IsVisible == true &&
-                               (minimapIcon.IsHide == false || Entity.GetComponent<Transitionable>().Flag1 == 1);
-                    };
-                }
-                else if (entity.Path.Contains("Metadata/Terrain/Leagues/Delve/Objects/DelveMineral"))
-                {
-                    Priority = IconPriority.High;
-                    MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.DelveMineralVein);
-                    Text = "Sulphite";
-                    Show = () => entity.IsValid && entity.IsTargetable;
-                }
-                else
-                {
-                    Show = () => Entity.GetComponent<MinimapIcon>() is { IsVisible: true, IsHide: false };
-                }
+            if (Entity.HasComponent<Portal>() && Entity.TryGetComponent<Transitionable>(out var transitionable))
+            {
+                Text = RenderName;
+                Show = () => Entity.IsValid && transitionable.Flag1 == 2;
+            }
+            else
+            {
+                Show = () => Entity.GetComponent<MinimapIcon>() is { IsVisible: true, IsHide: false };
             }
         }
     }
@@ -154,9 +101,4 @@ public abstract class BaseIcon
     public MonsterRarity Rarity { get; protected set; }
     public string Text { get; protected set; }
     public string RenderName => Entity.RenderName;
-
-    protected bool PathCheck(Entity path, params string[] check)
-    {
-        return check.Any(s => path.Path.Equals(s, StringComparison.Ordinal));
-    }
 }

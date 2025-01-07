@@ -29,11 +29,12 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
     public override bool Initialise()
     {
         IconsBuilder.Initialise();
+        Settings.AlwaysShownIngameIcons.Content = Settings.AlwaysShownIngameIcons.Content.DistinctBy(x => x.Value).ToList();
         Graphics.InitImage("sprites.png");
         Graphics.InitImage("Icons.png");
         CanUseMultiThreading = true;
         _iconListCache = CreateIconListCache();
-        Settings.IconListRefreshPeriod.OnValueChanged += (_, _) => CreateIconListCache();
+        Settings.IconListRefreshPeriod.OnValueChanged += (_, _) => _iconListCache = CreateIconListCache();
         return true;
     }
 
@@ -46,7 +47,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
     {
         return new TimeCache<List<BaseIcon>>(() =>
         {
-            var entitySource = Settings.DrawNotValid
+            var entitySource = Settings.DrawCachedEntities
                 ? GameController?.EntityListWrapper.Entities
                 : GameController?.EntityListWrapper?.OnlyValidEntities;
             var baseIcons = entitySource?.Select(x => x.GetHudComponent<BaseIcon>())
@@ -85,8 +86,9 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
 
     public override void Render()
     {
-        if (!Settings.Enable.Value || 
-            _largeMap == null || 
+        var center = GameController.Window.GetWindowRectangleTimeCache with{Location = Vector2.Zero};
+        Graphics.DrawLine(center.Center, center.Center + Vector2.One.Rotate(DateTime.UtcNow.Millisecond * 360f / 1000) * 100, 10, Color.Red, Color.Green);
+        if (_largeMap == null || 
             !GameController.InGame ||
             Settings.DrawOnlyOnLargeMap && _largeMap != true) 
             return;
@@ -118,6 +120,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
                 continue;
 
             if (icon.HasIngameIcon &&
+                icon is not CustomIcon &&
                 (!Settings.DrawReplacementsForGameIconsWhenOutOfRange || icon.Entity.IsValid) &&
                 !Settings.AlwaysShownIngameIcons.Content.Any(x => x.Value.Equals(icon.Entity.Path)))
                 continue;

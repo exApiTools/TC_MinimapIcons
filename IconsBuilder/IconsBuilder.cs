@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using ExileCore2;
 using ExileCore2.PoEMemory.Components;
 using ExileCore2.PoEMemory.MemoryObjects;
@@ -29,22 +31,19 @@ public class IconsBuilder
 
     private List<string> IgnoredEntities { get; set; }
     private Dictionary<string, Vector2i> AlertEntitiesWithIconSize { get; set; } = new Dictionary<string, Vector2i>();
-    private static EntityType[] Chests => new[]
-    {
-        EntityType.Chest,
-        EntityType.SmallChest
-    };
-    private static EntityType[] SkippedEntityTypes => new []
-    {
+
+    private static EntityType[] SkippedEntityTypes =>
+    [
         EntityType.HideoutDecoration, 
         EntityType.Effect, 
         EntityType.Light, 
         EntityType.ServerObject, 
         EntityType.Daemon,
-        EntityType.Error
-    };
+        EntityType.Error,
+    ];
 
     private int RunCounter { get; set; }
+    private int IconVersion;
         
     private void ReadAlertFile()
     {
@@ -86,6 +85,7 @@ public class IconsBuilder
 
     public bool Initialise()
     {
+        Settings.ResetIcons.OnPressed = () => { IconVersion++; };
         ReadAlertFile();           
         ReadIgnoreFile();
         return true;
@@ -103,12 +103,12 @@ public class IconsBuilder
     {
         foreach (var entity in _plugin.GameController.Entities)
         {
-            if (entity.GetHudComponent<BaseIcon>() != null) continue;
+            if (entity.GetHudComponent<BaseIcon>() is { Version: var version, } && version >= IconVersion) continue;
             if (SkipIcon(entity)) continue;
 
             var icon = GenerateIcon(entity);
             if (icon == null) continue;
-
+            icon.Version = IconVersion;
             entity.SetHudComponent(icon);
         }
     }
@@ -122,13 +122,22 @@ public class IconsBuilder
         return false;
     }
 
+    private ConditionalWeakTable<string, Regex> _regexes = [];
+
     private BaseIcon GenerateIcon(Entity entity)
     {
+        var metadata = entity.Metadata;
+        if (Settings.CustomIcons.Content
+                .FirstOrDefault(x => _regexes.GetValue(x.MetadataRegex.Value, p => new Regex(p))!.IsMatch(metadata)) is { } customIconConfig)
+        {
+            return new CustomIcon(entity, Settings, customIconConfig);
+        }
+
         if (entity.Type == EntityType.WorldItem)
         {
             if (Settings.UseReplacementsForItemIconsWhenOutOfRange &&
                 entity.TryGetComponent<WorldItem>(out var worldItem) && 
-                worldItem.Icon is {} icon && 
+                worldItem.Icon is var icon && 
                 icon != MapIconsIndex.None)
             {
                 return new IngameItemReplacerIcon(entity, Settings, icon);
@@ -176,7 +185,7 @@ public class IconsBuilder
         }
 
         //Chests
-        if (Chests.Any(x => x == entity.Type) && !entity.IsOpened)
+        if (entity.Type == EntityType.Chest && !entity.IsOpened)
             return new ChestIcon(entity, Settings);
 
         //Area transition

@@ -10,6 +10,15 @@ using GameOffsets2.Native;
 
 namespace MinimapIcons.IconsBuilder.Icons;
 
+public enum ChestType
+{
+    Breach,
+    Strongbox,
+    SmallChest,
+    Expedition,
+    Sanctum,
+}
+
 public class ChestIcon : BaseIcon
 {
     public ChestIcon(Entity entity, IconsBuilderSettings settings) : base(entity)
@@ -25,10 +34,6 @@ public class ChestIcon : BaseIcon
             CType = ChestType.Breach;
         else if (Entity.Path.Contains("Metadata/Chests/StrongBoxes"))
             CType = ChestType.Strongbox;
-        else if (Entity.League == LeagueType.Legion)
-            CType = ChestType.Legion;
-        else if (Entity.League == LeagueType.Heist)
-            CType = ChestType.Heist;
         else if (Entity.Path.StartsWith("Metadata/Chests/LeaguesExpedition/", StringComparison.Ordinal))
             CType = ChestType.Expedition;
         else if (Entity.Path.StartsWith("Metadata/Chests/LeagueSanctum/", StringComparison.Ordinal))
@@ -38,14 +43,14 @@ public class ChestIcon : BaseIcon
 
         Show = () => !Entity.IsOpened;
 
-        if (!_HasIngameIcon || CType == ChestType.Heist)
-            MainTexture = new HudTexture { FileName = "sprites.png" };
-        else
+        if (_HasIngameIcon)
         {
             MainTexture.Size = settings.SizeChestIcon;
             Text = Entity.GetComponent<Render>()?.Name;
             return;
         }
+
+        MainTexture = new HudTexture { FileName = "sprites.png" };
 
         MainTexture.Color = Rarity switch
         {

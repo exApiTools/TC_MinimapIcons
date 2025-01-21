@@ -52,6 +52,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
                 : GameController?.EntityListWrapper?.OnlyValidEntities;
             var baseIcons = entitySource?.Select(x => x.GetHudComponent<BaseIcon>())
                 .Where(icon => icon != null)
+                .Where(icon => (!icon.Entity.Path.Contains("Breach/Monsters") && !icon.Entity.Path.Contains("Chests/breach")) || Settings.CacheBreachEntities || icon.Entity.IsValid)
                 .OrderBy(x => x.Priority)
                 .ToList();
             return baseIcons ?? [];

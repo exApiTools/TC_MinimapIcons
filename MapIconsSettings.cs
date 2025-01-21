@@ -14,6 +14,9 @@ public class MapIconsSettings : ISettings
     public ToggleNode DrawReplacementsForGameIconsWhenOutOfRange { get; set; } = new ToggleNode(true);
     public ToggleNode IgnoreFullscreenPanels { get; set; } = new ToggleNode(false);
     public ToggleNode IgnoreLargePanels { get; set; } = new ToggleNode(false);
+
+    [Menu("Cache breach entities", "Breaches spawn lots of entities, to avoid cluttering your minimap you can turn off this setting")]
+    public ToggleNode CacheBreachEntities { get; set; } = new ToggleNode(true);
     public ToggleNode Enable { get; set; } = new ToggleNode(true);
     public RangeNode<int> IconListRefreshPeriod { get; set; } = new RangeNode<int>(100, 0, 1000);
 

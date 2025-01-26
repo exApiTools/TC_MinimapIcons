@@ -103,13 +103,21 @@ public class IconsBuilder
     {
         foreach (var entity in _plugin.GameController.Entities)
         {
-            if (entity.GetHudComponent<BaseIcon>() is { Version: var version, } && version >= IconVersion) continue;
-            if (SkipIcon(entity)) continue;
+            try
+            {
+                if (entity == null) continue;
+                if (entity.GetHudComponent<BaseIcon>() is { Version: var version, } && version >= IconVersion) continue;
+                if (SkipIcon(entity)) continue;
 
-            var icon = GenerateIcon(entity);
-            if (icon == null) continue;
-            icon.Version = IconVersion;
-            entity.SetHudComponent(icon);
+                var icon = GenerateIcon(entity);
+                if (icon == null) continue;
+                icon.Version = IconVersion;
+                entity.SetHudComponent(icon);
+            }
+            catch (Exception ex)
+            {
+                _plugin.LogError($"Failed to build an icon for {entity}: {ex}");
+            }
         }
     }
 
@@ -122,7 +130,7 @@ public class IconsBuilder
         return false;
     }
 
-    private ConditionalWeakTable<string, Regex> _regexes = [];
+    private readonly ConditionalWeakTable<string, Regex> _regexes = [];
 
     private BaseIcon GenerateIcon(Entity entity)
     {
@@ -177,7 +185,8 @@ public class IconsBuilder
         //Player
         if (entity.Type == EntityType.Player)
         {
-            if (_plugin.GameController.IngameState.Data.LocalPlayer.Address == entity.Address ||
+            if (!entity.HasComponent<Player>() ||
+                _plugin.GameController.IngameState.Data.LocalPlayer.Address == entity.Address ||
                 _plugin.GameController.IngameState.Data.LocalPlayer.GetComponent<Render>().Name == entity.RenderName) return null;
 
             if (!entity.IsValid) return null;

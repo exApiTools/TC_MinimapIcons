@@ -13,7 +13,10 @@ public class PlayerIcon : BaseIcon
     {
         Show = () => entity.IsValid && !settings.HidePlayers;
         if (_HasIngameIcon) return;
-        MainTexture = new HudTexture("Icons.png") {UV = SpriteHelper.GetUV(MapIconsIndex.OtherPlayer)};
+        MainTexture = new HudTexture("Icons.png")
+        {
+            UV = SpriteHelper.GetUV(MapIconsIndex.OtherPlayer),
+        };
         Text = entity.GetComponent<Player>().PlayerName;
     }
 }

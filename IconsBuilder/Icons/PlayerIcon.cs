@@ -8,7 +8,7 @@ namespace MinimapIcons.IconsBuilder.Icons;
 
 public class PlayerIcon : BaseIcon
 {
-    public PlayerIcon(Entity entity, IconsBuilderSettings settings) :
+    public PlayerIcon(Entity entity, IconsBuilderSettings settings, string playerName) :
         base(entity)
     {
         Show = () => entity.IsValid && !settings.HidePlayers;
@@ -17,6 +17,6 @@ public class PlayerIcon : BaseIcon
         {
             UV = SpriteHelper.GetUV(MapIconsIndex.OtherPlayer),
         };
-        Text = entity.GetComponent<Player>().PlayerName;
+        Text = playerName;
     }
 }

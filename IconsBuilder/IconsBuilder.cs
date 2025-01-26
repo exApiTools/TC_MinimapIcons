@@ -185,12 +185,13 @@ public class IconsBuilder
         //Player
         if (entity.Type == EntityType.Player)
         {
-            if (!entity.HasComponent<Player>() ||
+            if (!entity.TryGetComponent<Player>(out var player) ||
+                player.PlayerName is not {} playerName ||
                 _plugin.GameController.IngameState.Data.LocalPlayer.Address == entity.Address ||
                 _plugin.GameController.IngameState.Data.LocalPlayer.GetComponent<Render>().Name == entity.RenderName) return null;
 
             if (!entity.IsValid) return null;
-            return new PlayerIcon(entity, Settings);
+            return new PlayerIcon(entity, Settings, playerName);
         }
 
         //Chests

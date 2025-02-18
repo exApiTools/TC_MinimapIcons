@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using ExileCore2;
-using ExileCore2.PoEMemory.Components;
-using ExileCore2.PoEMemory.Elements;
-using ExileCore2.PoEMemory.MemoryObjects;
-using ExileCore2.Shared.Cache;
-using ExileCore2.Shared.Enums;
-using ExileCore2.Shared.Helpers;
+using ExileCore;
+using ExileCore.PoEMemory.Components;
+using ExileCore.PoEMemory.Elements;
+using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared.Cache;
+using ExileCore.Shared.Enums;
+using ExileCore.Shared.Helpers;
 using MinimapIcons.IconsBuilder.Icons;
-using RectangleF = ExileCore2.Shared.RectangleF;
+using Color = SharpDX.Color;
+using RectangleF = SharpDX.RectangleF;
 using Vector2 = System.Numerics.Vector2;
 
 namespace MinimapIcons;
@@ -198,7 +199,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
         }, Settings.IconListRefreshPeriod);
     }
 
-    public override void Tick()
+    public override Job Tick()
     {
         IconsBuilder.Tick();
         _ingameUi = GameController.Game.IngameState.IngameUi;
@@ -207,7 +208,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
         if (smallMiniMap.IsValid && smallMiniMap.IsVisibleLocal)
         {
             var mapRect = smallMiniMap.GetClientRectCache;
-            _mapCenter = mapRect.Center;
+            _mapCenter = mapRect.Center.ToVector2Num();
             _largeMap = false;
             _mapScale = smallMiniMap.MapScale;
         }
@@ -222,6 +223,8 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
         {
             _largeMap = null;
         }
+
+        return null;
     }
 
     public override void Render()
@@ -239,7 +242,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
 
         var playerRender = GameController?.Player?.GetComponent<Render>();
         if (playerRender == null) return;
-        var playerPos = playerRender.Pos.WorldToGrid();
+        var playerPos = playerRender.PosNum.WorldToGrid();
         var playerHeight = -playerRender.UnclampedHeight;
 
         if (LargeMapWindow == null) return;
@@ -284,7 +287,7 @@ public class MinimapIcons : BaseSettingsPlugin<MapIconsSettings>
             if (_largeMap == false && !_ingameUi.Map.SmallMiniMap.GetClientRectCache.Contains(drawRect)) 
                 continue;
 
-            Graphics.DrawImage(iconValueMainTexture.FileName, drawRect, iconValueMainTexture.UV, iconValueMainTexture.Color);
+            Graphics.DrawImage(iconValueMainTexture.FileName, drawRect, iconValueMainTexture.UV, iconValueMainTexture.Color.ToSharpDx());
             if (icon.Hidden())
             {
                 var s = drawRect.Width * 0.5f;

@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using ExileCore2.PoEMemory.Components;
-using ExileCore2.PoEMemory.MemoryObjects;
-using ExileCore2.Shared;
-using ExileCore2.Shared.Cache;
-using ExileCore2.Shared.Enums;
-using ExileCore2.Shared.Helpers;
-using GameOffsets2.Native;
+using ExileCore.PoEMemory.Components;
+using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared;
+using ExileCore.Shared.Cache;
+using ExileCore.Shared.Enums;
+using ExileCore.Shared.Helpers;
+using GameOffsets.Native;
 
 namespace MinimapIcons.IconsBuilder.Icons;
 

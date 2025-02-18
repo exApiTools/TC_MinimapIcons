@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <OutputType>Library</OutputType>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="config\**" />
@@ -11,17 +10,18 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ExileCore2">
-      <HintPath>$(exapiPackage)\ExileCore2.dll</HintPath>
+    <Reference Include="ExileCore">
+      <HintPath>$(exapiPackage)\ExileCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="GameOffsets2">
-      <HintPath>$(exapiPackage)\GameOffsets2.dll</HintPath>
+    <Reference Include="GameOffsets">
+      <HintPath>$(exapiPackage)\GameOffsets.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="ImGui.NET" Version="1.90.0.1" />
+    <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
   </ItemGroup>
 </Project>

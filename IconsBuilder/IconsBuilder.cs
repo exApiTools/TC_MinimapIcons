@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using ExileCore2;
-using ExileCore2.PoEMemory.Components;
-using ExileCore2.PoEMemory.MemoryObjects;
-using ExileCore2.Shared.Enums;
-using GameOffsets2.Native;
+using ExileCore;
+using ExileCore.PoEMemory.Components;
+using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared.Enums;
+using GameOffsets.Native;
 using MinimapIcons.IconsBuilder.Icons;
 
 namespace MinimapIcons.IconsBuilder;
@@ -163,7 +163,7 @@ public class IconsBuilder
             var name = minimapIconComponent.Name;
             if (!string.IsNullOrEmpty(name))
             {
-                return new IngameIconReplacerIcon(entity, Settings);
+                return new IngameIconReplacerIcon(entity, Settings, _plugin.Settings);
             }
         }
 

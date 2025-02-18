@@ -2,21 +2,30 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using ExileCore2;
-using ExileCore2.PoEMemory.Components;
-using ExileCore2.PoEMemory.MemoryObjects;
-using ExileCore2.Shared;
-using ExileCore2.Shared.Enums;
-using ExileCore2.Shared.Helpers;
-using GameOffsets2.Native;
+using ExileCore;
+using ExileCore.PoEMemory.Components;
+using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared;
+using ExileCore.Shared.Enums;
+using ExileCore.Shared.Helpers;
+using GameOffsets.Native;
 
 namespace MinimapIcons.IconsBuilder.Icons;
 
 public enum ChestType
 {
     Breach,
+    Abyss,
+    Incursion,
+    Delve,
     Strongbox,
     SmallChest,
+    Fossil,
+    Perandus,
+    Labyrinth,
+    Synthesis,
+    Legion,
+    Heist,
     Expedition,
     Sanctum,
 }
@@ -29,12 +38,46 @@ public class ChestIcon : BaseIcon
         .Select(x => (x.value, x.str["Reward".Length..]))
         .ToDictionary(x => x.value, x => x.Item2);
 
-    public ChestIcon(Entity entity, IconsBuilderSettings settings) : base(entity)
+    private static readonly Dictionary<string, Color> FossilRarity = new Dictionary<string, Color>
+    {
+        { "Fractured", Color.Aquamarine },
+        { "Faceted", Color.Aquamarine },
+        { "Glyphic", Color.Aquamarine },
+        { "Hollow", Color.Aquamarine },
+        { "Shuddering", Color.Aquamarine },
+        { "Bloodstained", Color.Aquamarine },
+        { "Tangled", Color.OrangeRed },
+        { "Dense", Color.OrangeRed },
+        { "Gilded", Color.OrangeRed },
+        { "Sanctified", Color.Aquamarine },
+        { "Encrusted", Color.Yellow },
+        { "Aetheric", Color.Orange },
+        { "Enchanted", Color.Orange },
+        { "Pristine", Color.Orange },
+        { "Prismatic", Color.Orange },
+        { "Corroded", Color.Yellow },
+        { "Perfect", Color.Orange },
+        { "Jagged", Color.Yellow },
+        { "Serrated", Color.Yellow },
+        { "Bound", Color.Yellow },
+        { "Lucent", Color.Yellow },
+        { "Metallic", Color.Yellow },
+        { "Scorched", Color.Yellow },
+        { "Aberrant", Color.Yellow },
+        { "Frigid", Color.Yellow }
+    };
+
+public ChestIcon(Entity entity, IconsBuilderSettings settings) : base(entity)
     {
         Update(entity, settings);
     }
 
     public ChestType CType { get; private set; }
+
+    private bool PathCheck(Entity path, params string[] check)
+    {
+        return check.Any(s => path.Path.Equals(s, StringComparison.Ordinal));
+    }
 
     public void Update(Entity entity, IconsBuilderSettings settings)
     {
@@ -71,7 +114,7 @@ public class ChestIcon : BaseIcon
 
         Show = () => !Entity.IsOpened;
 
-        if (_HasIngameIcon)
+        if (_HasIngameIcon && CType != ChestType.Heist)
         {
             MainTexture.Size = settings.SizeChestIcon;
             Text = Entity.GetComponent<Render>()?.Name;

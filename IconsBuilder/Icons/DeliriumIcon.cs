@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using ExileCore2.PoEMemory.Components;
-using ExileCore2.PoEMemory.MemoryObjects;
-using ExileCore2.Shared;
-using ExileCore2.Shared.Enums;
-using ExileCore2.Shared.Helpers;
-using GameOffsets2.Native;
+using ExileCore.PoEMemory.Components;
+using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared;
+using ExileCore.Shared.Enums;
+using ExileCore.Shared.Helpers;
+using GameOffsets.Native;
 
 namespace MinimapIcons.IconsBuilder.Icons;
 
@@ -41,15 +41,22 @@ internal class DeliriumIcon : BaseIcon
         if (_HasIngameIcon && entity.HasComponent<MinimapIcon>() && !entity.GetComponent<MinimapIcon>().Name.Equals("NPC"))
             return;
 
-        if (entity.Path.StartsWith("Metadata/Monsters/LeagueDelirium/DoodadDaemons", StringComparison.Ordinal))
+        if (entity.Path.StartsWith("Metadata/Monsters/LeagueAffliction/DoodadDaemons", StringComparison.Ordinal))
         {
-            if (entity.Path.Contains("ShardPack", StringComparison.OrdinalIgnoreCase))
+            var pathstring = "Metadata/Monsters/LeagueAffliction/DoodadDaemons/DoodadDaemon";
+            //proximity spawning volatile ->bad
+            if (entity.Path.StartsWith(pathstring + "BloodBag", StringComparison.Ordinal))
+            {
+                MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.RedFlag);
+                Text = settings.DeliriumText.Value ? "Avoid" : "";
+            }
+            else if (entity.Path.StartsWith(pathstring + "EggFodder", StringComparison.Ordinal))
+            {
+                MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.NPC);
+            }
+            else if (entity.Path.StartsWith(pathstring + "GlobSpawn", StringComparison.Ordinal))
             {
                 MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.MyPlayer);
-                MainTexture.Size = settings.SizeEntityProximityMonsterIcon;
-                Hidden = () => false;
-                Priority = IconPriority.Medium;
-                return;
             }
             else
             {
@@ -57,6 +64,12 @@ internal class DeliriumIcon : BaseIcon
                 MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.QuestObject);
                 return;
             }
+
+            MainTexture.Size = settings.SizeEntityProximityMonsterIcon;
+            Hidden = () => false;
+
+            Priority = IconPriority.Medium;
+            return;
         }
 
         if (!entity.IsHostile)

@@ -1,15 +1,33 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using ExileCore2.PoEMemory.Components;
-using ExileCore2.PoEMemory.MemoryObjects;
-using ExileCore2.Shared;
-using ExileCore2.Shared.Enums;
-using ExileCore2.Shared.Helpers;
-using GameOffsets2.Native;
-using RectangleF = ExileCore2.Shared.RectangleF;
+using ExileCore.PoEMemory.Components;
+using ExileCore.PoEMemory.MemoryObjects;
+using ExileCore.Shared;
+using ExileCore.Shared.Enums;
+using ExileCore.Shared.Helpers;
+using GameOffsets.Native;
+using SharpDX;
+using Color = System.Drawing.Color;
+using Vector2 = System.Numerics.Vector2;
 
 namespace MinimapIcons.IconsBuilder.Icons;
+
+public class HudTexture
+{
+    public HudTexture()
+    {
+    }
+
+    public HudTexture(string fileName)
+    {
+        FileName = fileName;
+    }
+
+    public string FileName { get; set; }
+    public RectangleF UV { get; set; } = new RectangleF(0, 0, 1, 1);
+    public float Size { get; set; } = 13;
+    public System.Drawing.Color Color { get; set; } = Color.White;
+}
 
 public abstract class BaseIcon
 {
@@ -58,7 +76,7 @@ public abstract class BaseIcon
 
         Show = () => Entity.IsValid;
         Hidden = () => entity.IsHidden;
-        GridPosition = () => Entity.GridPos;
+        GridPosition = () => Entity.GridPosNum;
 
         if (Entity.TryGetComponent<MinimapIcon>(out var minimapIconComponent))
         {
@@ -69,7 +87,7 @@ public abstract class BaseIcon
                 return;
             }
 
-            var iconIndexByName = ExileCore2.Shared.Helpers.Extensions.IconIndexByName(name);
+            var iconIndexByName = ExileCore.Shared.Helpers.Extensions.IconIndexByName(name);
 
             if (iconIndexByName != MapIconsIndex.MyPlayer)
             {

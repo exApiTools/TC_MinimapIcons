@@ -1,6 +1,6 @@
-using ExileCore2.Shared.Attributes;
-using ExileCore2.Shared.Interfaces;
-using ExileCore2.Shared.Nodes;
+﻿using ExileCore.Shared.Attributes;
+using ExileCore.Shared.Interfaces;
+using ExileCore.Shared.Nodes;
 using MinimapIcons.IconsBuilder;
 
 namespace MinimapIcons;
@@ -19,6 +19,18 @@ public class MapIconsSettings : ISettings
     public ToggleNode CacheBreachEntities { get; set; } = new ToggleNode(true);
     public ToggleNode Enable { get; set; } = new ToggleNode(true);
     public RangeNode<int> IconListRefreshPeriod { get; set; } = new RangeNode<int>(100, 0, 1000);
+
+    [Menu(null, CollapsedByDefault = true)]
+    public ContentNode<TextNode> AlwaysShownIngameIcons { get; set; } =
+        new ContentNode<TextNode>()
+        {
+            Content =
+            [
+            ],
+            EnableControls = true, 
+            ItemFactory = () => new TextNode(""),
+            UseFlatItems = true,
+        };
 
     public IconsBuilderSettings IconsBuilderSettings { get; set; } = new();
 }

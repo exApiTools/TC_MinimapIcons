@@ -1,13 +1,12 @@
-﻿using System.Drawing;
-using System.Numerics;
-using ExileCore2;
-using ExileCore2.Shared.Attributes;
-using ExileCore2.Shared.Enums;
-using ExileCore2.Shared.Helpers;
-using ExileCore2.Shared.Nodes;
-using ImGuiNET;
+﻿using ExileCore;
+using ExileCore.Shared.Attributes;
+using ExileCore.Shared.Enums;
+using ExileCore.Shared.Helpers;
+using ExileCore.Shared.Nodes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using SharpDX;
+using Vector2 = System.Numerics.Vector2;
 
 namespace MinimapIcons.IconsBuilder;
 

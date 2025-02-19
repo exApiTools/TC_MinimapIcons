@@ -84,17 +84,24 @@ public class MonsterIcon : BaseIcon
                 {
                     case MonsterRarity.White:
                         MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeRedCircle);
+                        if (settings.MonsterRarityNames.ShowNormalNames)
+                            Text = RenderName.Split(',').FirstOrDefault();
                         break;
                     case MonsterRarity.Magic:
                         MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeBlueCircle);
-
+                        if (settings.MonsterRarityNames.ShowMagicNames)
+                            Text = RenderName.Split(',').FirstOrDefault();
                         break;
                     case MonsterRarity.Rare:
                         MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeYellowCircle);
+                        if (settings.MonsterRarityNames.ShowRareNames)
+                            Text = RenderName.Split(',').FirstOrDefault();
                         break;
                     case MonsterRarity.Unique:
                         MainTexture.UV = SpriteHelper.GetUV(MapIconsIndex.LootFilterLargeWhiteHexagon);
                         MainTexture.Color = Color.DarkOrange;
+                        if (settings.MonsterRarityNames.ShowUniqueNames)
+                            Text = RenderName.Split(',').FirstOrDefault();
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(
